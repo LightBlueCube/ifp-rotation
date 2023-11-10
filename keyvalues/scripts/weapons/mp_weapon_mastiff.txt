@@ -1,0 +1,15 @@
+WeaponData
+{
+	MP_BASE
+	{
+		// NPC
+		"npc_accuracy_multiplier_pilot"					"100.0"
+		"npc_min_burst"									"1"
+		"npc_max_burst"									"1"
+		"npc_rest_time_between_bursts_min"				"2.0"
+		"npc_rest_time_between_bursts_max"				"4.5"
+		// Damage - When Used by NPCs
+		"npc_damage_near_value"   						"20"
+		"npc_damage_far_value"							"12"
+	}
+}

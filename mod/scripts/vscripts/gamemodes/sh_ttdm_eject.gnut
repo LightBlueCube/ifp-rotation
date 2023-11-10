@@ -1,0 +1,14 @@
+global function TTDMEject
+global function SetTTDMEject
+
+bool ttdmEject = false
+
+bool function TTDMEject()
+{
+    return ttdmEject
+}
+
+void function SetTTDMEject( bool b )
+{
+    ttdmEject = b
+}

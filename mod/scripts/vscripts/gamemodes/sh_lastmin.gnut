@@ -1,0 +1,110 @@
+global function LastMinute_Init
+global function SetTeamScoreAddition
+global function GetTeamScoreAddition
+global function AddCallback_OnLastMinute
+global function ScoreAdditionFromTeam
+
+int teamScoreAddition = 1
+
+array<void functionref()> lastMinCallbackFunc = []
+
+array<string> lastMinMusic = [
+	"music_reclamation_17a_thingsgetbad",
+	"music_boomtown_22_embarkbt",
+	"music_wilds_17_titanfight",
+	"music_reclamation_04_firsttitanbattle",
+	"music_skyway_12_titanhillwave03",
+	"music_skyway_13_enroutetobliskandslone",
+	"music_s2s_07_shipexplode",
+	"music_s2s_12_steering",
+]
+
+void function LastMinute_Init()
+{
+    AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+}
+
+void function SetTeamScoreAddition( int i )
+{
+    teamScoreAddition = i
+}
+
+int function GetTeamScoreAddition()
+{
+    return teamScoreAddition
+}
+
+void function AddCallback_OnLastMinute( void functionref() callbackFunc )
+{
+    lastMinCallbackFunc.append( callbackFunc )
+}
+
+void function OnPlaying()
+{
+	thread LastMinThreaded()
+}
+
+void function LastMinThreaded()
+{
+	svGlobal.levelEnt.EndSignal( "NukeStart" )
+
+	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
+	OnThreadEnd(
+		function():( music )
+		{
+			teamScoreAddition = 1
+			foreach( player in GetPlayerArray() )
+			{
+				if( !IsValid( player ) )
+					continue
+				StopSoundOnEntity( player, music )
+			}
+		}
+	)
+
+	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
+
+	wait timeLimit - 60
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
+	}
+    foreach( callbackFunc in lastMinCallbackFunc )
+        callbackFunc()
+	wait 60
+}
+
+int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 150 )
+{
+	float floatScore = float( score * teamScoreAddition )
+
+	if( team != TEAM_IMC && team != TEAM_MILITIA )
+		return int( floatScore )
+
+	int otherTeam = GetOtherTeam( team )
+	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / balanceAmount
+
+	if( addition >= 0 && addition <= 1)
+		return int( floatScore )
+	if( addition >= 0 )
+		return round( floatScore * addition )
+
+    if( GameRules_GetTeamScore( team ) - balanceAmount <= GameRules_GetTeamScore( otherTeam ) )
+		return int( floatScore )
+
+	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) + balanceAmount ) / ( balanceAmount *  2 )
+
+	addition = 1 / addition
+	return round( floatScore * addition )
+}
+
+int function round( float num )
+{
+	int i = int( num )
+	if( num - i < 0.5)
+		return i
+	return i + 1
+}

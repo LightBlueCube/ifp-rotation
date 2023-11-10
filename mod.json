@@ -1,0 +1,27 @@
+{
+    "Name": "GamemodePack",
+    "LoadPriority": 100,
+    "Scripts": [
+        {
+            "Path": "gamemodes/sh_lastmin.gnut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "LastMinute_Init"
+            }
+        },
+        {
+            "Path": "gamemodes/sh_ttdm_eject.gnut",
+            "RunOn": "SERVER && MP"
+        }
+    ],
+    "ConVars": [
+        {
+            "Name": "random_map_playlist",
+            "DefaultValue": ""
+        },
+        {
+            "Name": "random_mode_playlist",
+            "DefaultValue": ""
+        }
+    ]
+}

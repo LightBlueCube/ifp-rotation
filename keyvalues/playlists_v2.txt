@@ -1,0 +1,61 @@
+playlists
+{
+	Gamemodes
+	{
+		aitdm
+		{
+			inherit defaults
+			vars
+			{
+				scorelimit 2147483647
+				timelimit 18
+			}
+		}
+		cp
+		{
+			inherit defaults
+			vars
+			{
+				scorelimit 2147483647
+				timelimit 18
+			}
+		}
+		at
+		{
+			inherit defaults
+			vars
+			{
+				scorelimit 2147483647
+				timelimit 12
+			}
+		}
+		ctf
+		{
+			inherit defaults
+			vars
+			{
+				respawn_delay 0
+				scorelimit 5
+				timelimit 10
+			}
+		}
+		fw
+		{
+			inherit defaults
+			vars
+			{
+				timelimit 16
+			}
+		}
+		ttdm
+		{
+			inherit defaults
+			vars
+			{
+				scorelimit 2147483647
+				timelimit 10
+				respawn_delay 0
+			}
+		}
+	}
+}

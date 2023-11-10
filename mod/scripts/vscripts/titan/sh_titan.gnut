@@ -603,7 +603,8 @@ function TitanEjectPlayer( entity ejectTitan, bool instant = false ) //TODO: Thi
 		player.p.lastEjectTime = Time()
 		HolsterAndDisableWeapons( player ) //Primarily done to not play the holster animation, then deploy animation of weapon if we happened to switch the active weapon in GiveWeaponsFromStoredArray()
 		TitanBecomesPilot( ejectTitan, titan )
-		DeployAndEnableWeapons( player )//Undo Holster
+		if( !TTDMEject() )
+			DeployAndEnableWeapons( player )//Undo Holster
 		player.UnfreezeControlsOnServer()
 	}
 	else

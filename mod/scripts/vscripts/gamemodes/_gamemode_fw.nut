@@ -1611,7 +1611,7 @@ void function TurretDamageModifier( entity turret, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_flame_wall:
 		case eDamageSourceId.mp_titanability_slow_trap:
 		case eDamageSourceId.mp_titancore_flame_wave_secondary:
-		case eDamageSourceId.mp_weapon_cruise_missile
+		case eDamageSourceId.mp_weapon_cruise_missile:
 			DamageInfo_ScaleDamage( damageInfo, TURRET_DOT_DAMAGE_FRAC )
 			break
 
@@ -2160,7 +2160,7 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_flame_wall:
 		case eDamageSourceId.mp_titanability_slow_trap:
 		case eDamageSourceId.mp_titancore_flame_wave_secondary:
-		case eDamageSourceId.mp_weapon_cruise_missile
+		case eDamageSourceId.mp_weapon_cruise_missile:
 			DamageInfo_ScaleDamage( damageInfo, HAVESTER_DOT_DAMAGE_FRAC )
 			break
 
@@ -2174,7 +2174,7 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 	if ( damageSourceID in file.harvesterDamageSourceMods )
 		DamageInfo_ScaleDamage( damageInfo, file.harvesterDamageSourceMods[ damageSourceID ] )
 
-	float balanceFrac = ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10 ) / 100
+	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10 ) ) / 100.0
 	if( balanceFrac == 0 || harvester.GetShieldHealth() != 0 )
 		return
 	if( balanceFrac < 0.5 )

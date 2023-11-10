@@ -77,7 +77,7 @@ void function LastMinThreaded()
 	wait 60
 }
 
-int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 150 )
+int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 )
 {
 	float floatScore = float( score * teamScoreAddition )
 
@@ -98,6 +98,8 @@ int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 150
 	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) + balanceAmount ) / ( balanceAmount *  2 )
 
 	addition = 1 / addition
+	if( addition < 0.5 )
+		addition = 0.5
 	return round( floatScore * addition )
 }
 

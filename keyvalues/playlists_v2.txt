@@ -17,7 +17,7 @@ playlists
 			vars
 			{
 				scorelimit 2147483647
-				timelimit 18
+				timelimit 16
 			}
 		}
 		at

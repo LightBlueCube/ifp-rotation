@@ -90,9 +90,6 @@ int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200
 	int otherTeam = GetOtherTeam( team )
 	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / balanceAmount
 
-	printt( "score"+ floatScore +" addition"+ addition +" after"+  round( floatScore * addition ) )
-	printt( "score"+ GameRules_GetTeamScore( TEAM_MILITIA ) +"-"+ GameRules_GetTeamScore( TEAM_IMC ) )
-
 	if( addition >= 0 && addition <= 1)
 		return int( floatScore )
 	if( addition >= 0 )
@@ -104,7 +101,6 @@ int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200
 	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) + balanceAmount ) / ( balanceAmount *  2 )
 
 	addition = 1 / addition
-	printt( "2score"+ floatScore +" addition"+ addition +" after"+  int( floatScore * addition ) )
 
 	if( addition < 0.5 )
 		addition = 0.5

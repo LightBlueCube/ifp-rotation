@@ -25,7 +25,7 @@ void function GamemodeTTDM_Init()
 	SetKillStreakEnable( false )
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 }
 
 void function OnLastMinute()

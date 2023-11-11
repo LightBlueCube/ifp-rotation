@@ -50,7 +50,7 @@ void function GamemodeCP_Init()
 	AITdm_SetReapersPerTeam( 1 )
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
 }
 

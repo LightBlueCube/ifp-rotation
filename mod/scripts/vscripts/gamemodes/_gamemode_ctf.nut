@@ -62,27 +62,27 @@ void function CaptureTheFlag_Init()
 	CTFScoreEventSetUp()
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
 }
 
 void function CTFScoreEventSetUp()
 {
 	//use modded settings!
-	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10 )
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.2, 0.1 )
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.0 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.20 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.2, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.30, 0.10 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.80 )
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.02, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.02, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.02, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.15, 0.05, 10.0 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 1.0 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 1.0 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 1.0 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 10.0 )
 
 	// override settings
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10 )
@@ -107,10 +107,7 @@ void function OnLastMinute()
 		if( IsValid( player.GetPetTitan() ) )
 			continue
 
-		if( IsAlive( player ) )
-			thread CreateTitanForPlayerAndHotdrop( player, GetTitanReplacementPoint( player, false ) )
-		else
-			RespawnAsTitan( player, false )
+		thread CreateTitanForPlayerAndHotdrop( player, GetTitanReplacementPoint( player, false ) )
 	}
 }
 
@@ -402,6 +399,8 @@ void function DropFlag( entity player, bool realDrop = true )
 {
 	entity flag = GetFlagForTeam( GetOtherTeam( player.GetTeam() ) )
 
+	if( !IsValid( flag ) )
+		return
 	if ( flag.GetParent() != player )
 		return
 

@@ -186,6 +186,7 @@ void function OnLastMinute()
 		if( !IsValid( player ) )
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "所有炮塔已摧毀！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
+		thread CreateTitanForPlayerAndHotdrop( player, GetTitanReplacementPoint( player, false ) )
 	}
 }
 

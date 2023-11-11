@@ -76,13 +76,14 @@ void function RandomGameMode()
 
 void function RandMap( string mode )
 {
-	int i
-	foreach( map in MODE_PLAYLIST )
+	int i = 0
+	foreach( map in MAP_PLAYLIST )
 	{
 		if( GetMapName() == map )
 			break
 		i++
 	}
+
 
 	if( MAP_PLAYLIST.len() - 1 == i || MAP_PLAYLIST.len() == 0 )
 	{
@@ -104,7 +105,7 @@ void function RandMap( string mode )
 	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
 
 	StoreStringArrayIntoConVar( "random_map_playlist", MAP_PLAYLIST )
-	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST  )
+	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST )
 
 	wait GAME_POSTMATCH_LENGTH - 0.1
 
@@ -124,7 +125,7 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	if( mode == "at" )
 	{
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 6000" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
 	}
 	if( mode == "cp" )
 	{
@@ -135,7 +136,7 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	{
 		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 5" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 10" )
 	}
 	if( mode == "fw" )
 	{

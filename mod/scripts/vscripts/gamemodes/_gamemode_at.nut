@@ -134,7 +134,7 @@ void function GamemodeAt_Init()
 	AddCallback_OnLastMinute( OnLastMinute )
 
 	// tempfix specific
-	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
+	EarnMeterMP_SetPassiveGainProgessEnable( false ) // enable earnmeter gain progressing like vanilla
 }
 
 
@@ -675,6 +675,9 @@ void function AT_AddPlayerBonusPoints( entity player, int amount )
 
 int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 150 )
 {
+	if( score <= 0 )
+		return score
+
 	float floatScore = float( score * GetTeamScoreAddition() )
 
 	if( team != TEAM_IMC && team != TEAM_MILITIA )
@@ -684,6 +687,9 @@ int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 
 	int teamScore = GameRules_GetTeamScore( team ) + GetNonApplyMoneyFromTeam( team )
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam ) + GetNonApplyMoneyFromTeam( otherTeam )
 	float addition = float( otherTeamScore - teamScore ) / balanceAmount
+
+	printt( "score"+ floatScore +" addition"+ addition +" after"+  round( floatScore * addition ) )
+	printt( "score"+ teamScore +"-"+ otherTeamScore )
 
 	if( addition >= 0 && addition <= 1)
 		return int( floatScore )
@@ -696,6 +702,10 @@ int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 
 	addition = float( teamScore - otherTeamScore + balanceAmount ) / ( balanceAmount *  2 )
 
 	addition = 1 / addition
+	printt( "2score"+ floatScore +" addition"+ addition +" after"+  int( floatScore * addition ) )
+
+	if( addition > 0.5 )
+		addition = 0.5
 	return round( floatScore * addition )
 }
 

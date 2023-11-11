@@ -1,5 +1,5 @@
 global function RandomMap_Init
-global function RandomMap
+global function RandomGameMode
 
 const array<string> MAPS_ALL = [
 	"mp_black_water_canal",
@@ -17,6 +17,7 @@ const array<string> MAPS_ALL = [
 	"mp_wargames",
 	"mp_glitch",
 	"mp_rise" ]
+
 const array<string> MAPS_FW = [
 	"mp_forwardbase_kodai",
 	"mp_grave",
@@ -25,6 +26,7 @@ const array<string> MAPS_FW = [
 	"mp_eden",
 	"mp_crashsite3",
 	"mp_complex3" ]
+
 const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "ctf", "fw", "ttdm" ]
 
 array<string> MAP_PLAYLIST = []
@@ -34,16 +36,17 @@ void function RandomMap_Init()
 {
 	MAP_PLAYLIST = GetStringArrayFromConVar( "random_map_playlist" )
 	MODE_PLAYLIST = GetStringArrayFromConVar( "random_mode_playlist" )
+	if( MAP_PLAYLIST.len() == 0 && MODE_PLAYLIST.len() == 0 )
+	{
+		thread RandomGameMode()
+		return
+	}
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 }
 
 void function GameStateEnter_Postmatch()
 {
-	thread RandomWaiting()
-}
-void function RandomWaiting()
-{
-	RandomGameMode()
+	thread RandomGameMode()
 }
 void function RandomGameMode()
 {
@@ -61,7 +64,7 @@ void function RandomGameMode()
 		i++
 	}
 
-	if( i == MODE_PLAYLIST.len() )
+	if( MODE_PLAYLIST.len() - 1 == i )
 	{
 		MODE_PLAYLIST = GetRandomArrayElem( GAMEMODES_ALL )
 		i = 0
@@ -76,12 +79,12 @@ void function RandMap( string mode )
 	int i
 	foreach( map in MODE_PLAYLIST )
 	{
-		if( GameRules_GetMap() == map )
+		if( GetMapName() == map )
 			break
 		i++
 	}
 
-	if( MAP_PLAYLIST.len() == i )
+	if( MAP_PLAYLIST.len() - 1 == i || MAP_PLAYLIST.len() == 0 )
 	{
 		MAP_PLAYLIST = GetRandomArrayElem( MAPS_ALL )
 		i = 0
@@ -98,15 +101,54 @@ void function RandMap( string mode )
 	}
 
 	string map = MAP_PLAYLIST[i]
-	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapName( map ) +"\n如果你发现了任何bug（或疑似）\n请务必加群反馈，这对我们很重要！\nQQ群 -> 150381961", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
+	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
 
+	StoreStringArrayIntoConVar( "random_map_playlist", MAP_PLAYLIST )
+	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST  )
 
 	wait GAME_POSTMATCH_LENGTH - 0.1
 
+	RandomGamemode_SetPlaylistVarOverride( mode )
 	GameRules_ChangeMap( map, mode )
 }
 
 // utils shared //
+
+void function RandomGamemode_SetPlaylistVarOverride( string mode )
+{
+	if( mode == "aitdm" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 18" )
+	}
+	if( mode == "at" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 6000" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
+	}
+	if( mode == "cp" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
+	}
+	if( mode == "ctf" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 5" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
+	}
+	if( mode == "fw" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 100" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
+	}
+	if( mode == "ttdm" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 10" )
+	}
+}
 
 string function GetModeName( string mode )
 {
@@ -125,9 +167,10 @@ string function GetModeName( string mode )
 		case "ttdm":
 			return "泰坦爭鬥"
 	}
+	return "UNKNOWN"
 }
 
-string function GetMapName( string map )
+string function GetMapTitleName( string map )
 {
 	switch( map )
 	{
@@ -162,6 +205,7 @@ string function GetMapName( string map )
 		case "mp_crashsite3":
 			return "墜機現場"
 	}
+	return "UNKNOWN"
 }
 
 int function FindNearlyValidFWMap( int start )

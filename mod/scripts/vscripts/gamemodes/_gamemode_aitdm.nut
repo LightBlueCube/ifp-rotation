@@ -59,7 +59,7 @@ void function GamemodeAITdm_Init()
 	AddCallback_OnLastMinute( OnLastMinute )
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
 }
 
@@ -322,8 +322,6 @@ void function Spawner_Threaded( int team )
 
 	// used to index into escalation arrays
 	int index = team == TEAM_MILITIA ? 0 : 1
-
-	file.levels = [ file.levelSpectres, file.levelSpectres ] // due we added settings, should init levels here!
 
 	// handle prematch spawns
 	while( GetGameState() == eGameState.Prematch || GetGameState() == eGameState.Playing )

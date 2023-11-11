@@ -1,6 +1,6 @@
 {
     "Name": "GamemodePack",
-    "LoadPriority": 100,
+    "LoadPriority": 102,
     "Scripts": [
         {
             "Path": "gamemodes/sh_lastmin.gnut",

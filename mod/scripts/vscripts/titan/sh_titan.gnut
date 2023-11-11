@@ -787,6 +787,8 @@ void function KillPlayerOnGround( var player )
 		WaitFrame()
 		if( player.IsOnGround() )
 			break
+		if( player.IsHuman() && IsValid( player.GetParent() ) )
+			break
 	}
 	player.Die( null, null, { damageSourceId = eDamageSourceId.fall } )
 }

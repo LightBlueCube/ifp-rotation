@@ -22,14 +22,15 @@ void function GamemodeTTDM_Init()
 
 	Rodeo_SetBatteryPickupAllowed( true )
 	AddCallback_OnLastMinute( OnLastMinute )
+	SetKillStreakEnable( false )
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
 }
 
 void function OnLastMinute()
 {
-	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 25 + 2
+	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 20 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -152,7 +153,7 @@ void function AddTeamScoreForPlayerKilled( entity victim, entity attacker, var d
 	if( victim.IsTitan() )
 		score = 10
 
-	AddTeamScore( team, ScoreAdditionFromTeam( team, score, 100 ) )
+	AddTeamScore( team, ScoreAdditionFromTeam( team, score, 60 ) )
 }
 
 int function CheckScoreForDraw()

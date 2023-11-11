@@ -165,6 +165,7 @@ void function GamemodeFW_Init()
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
 
 	AddCallback_OnLastMinute( OnLastMinute )
+	SetBetterRespawnPointEnable( false )
 
 	// tempfix specifics
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
@@ -211,7 +212,7 @@ const float COMPLEX_CHECK_HEIGHT = 7000 // the map's highest part is 6716+, npcs
 // do a hack
 void function HACK_ForceDestroyNPCs()
 {
-	thread HACK_ForceDestroyNPCs_Threaded()
+	//thread HACK_ForceDestroyNPCs_Threaded()
 }
 
 void function HACK_ForceDestroyNPCs_Threaded()
@@ -2024,7 +2025,7 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 		return
 
 	// prevent player from sniping the harvester cross-map
-	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) )
+	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile )
 	{
 		Remote_CallFunction_NonReplay( attacker, "ServerCallback_FW_NotifyNeedsEnterEnemyArea" )
 		DamageInfo_SetDamage( damageInfo, 0 )
@@ -2038,8 +2039,10 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 	if( friendlyTeam == TEAM_IMC )
 		harvesterstruct = fw_harvesterImc
 
-	if ( !attacker.IsTitan() && !attacker.IsPlayer() )
+	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile )
 	{
+		if( attacker.IsPlayer() )
+			Remote_CallFunction_NonReplay( attacker , "ServerCallback_FW_NotifyTitanRequired" )
 		DamageInfo_SetDamage( damageInfo, harvester.GetShieldHealth() )
 		damageAmount = 0 // never damage haveter's prop
 	}
@@ -2160,8 +2163,11 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_flame_wall:
 		case eDamageSourceId.mp_titanability_slow_trap:
 		case eDamageSourceId.mp_titancore_flame_wave_secondary:
-		case eDamageSourceId.mp_weapon_cruise_missile:
 			DamageInfo_ScaleDamage( damageInfo, HAVESTER_DOT_DAMAGE_FRAC )
+			break
+
+		case eDamageSourceId.mp_weapon_cruise_missile:
+			DamageInfo_ScaleDamage( damageInfo, 0.167 )
 			break
 
 		// lockon damage
@@ -2488,7 +2494,7 @@ function FW_UseBattery( batteryPortvar, playervar ) //actually void function( en
     if( turretReplaced || teamChanged ) // replaced/hacked turret will spawn with 50% health
         newHealth = int ( turret.GetMaxHealth() * GetCurrentPlaylistVarFloat( "fw_turret_hacked_health", TURRET_HACKED_HEALTH_PERCENTAGE ) )
     // restore turret shield
-    int newShield = int ( min( turret.GetShieldHealthMax(), turret.GetShieldHealth() + ( turret.GetShieldHealth() * GetCurrentPlaylistVarFloat( "fw_turret_fixed_shield", TURRET_FIXED_SHIELD_PERCENTAGE ) ) ) )
+    int newShield = int ( min( turret.GetShieldHealthMax(), turret.GetShieldHealth() + ( turret.GetShieldHealthMax() * GetCurrentPlaylistVarFloat( "fw_turret_fixed_shield", TURRET_FIXED_SHIELD_PERCENTAGE ) ) ) )
     if( turretReplaced || teamChanged ) // replaced/hacked turret will spawn with 50% shield
         newShield = int ( turret.GetShieldHealthMax() * GetCurrentPlaylistVarFloat( "fw_turret_hacked_shield", TURRET_HACKED_SHIELD_PERCENTAGE ) )
     // only do team score event if turret's shields down, encourage players to hack more turrets

@@ -44,6 +44,7 @@ void function CaptureTheFlag_Init()
 	AddCallback_OnPilotBecomesTitan( DropFlagForBecomingTitan )
 
 	AddCallback_OnLastMinute( OnLastMinute )
+	SetBetterRespawnPointEnable( false )
 	AITdm_SetSquadsPerTeam( 3 )
 	AITdm_SetReapersPerTeam( 1 )
 
@@ -61,7 +62,7 @@ void function CaptureTheFlag_Init()
 	CTFScoreEventSetUp()
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
 }
 
@@ -349,7 +350,7 @@ void function GiveFlag( entity player, entity flag )
 	if( IsFlagHome( flag ) )
 	{
 		player.s.NukeTitan += 1
-		NSSendAnnouncementMessageToPlayer( player, "獲得核武泰坦！", "", < 255, 0, 0 >, 255, 5 )
+		thread SendAnnouncementMessageWaiting( player, "獲得核武泰坦！", 2 )
 	}
 
 	flag.SetParent( player, "FLAG" )
@@ -369,6 +370,12 @@ void function GiveFlag( entity player, entity flag )
 	EmitSoundOnEntityToTeam( flag, "UI_CTF_3P_EnemyGrabFlag", flag.GetTeam() )
 
 	SetFlagStateForTeam( flag.GetTeam(), eFlagState.Away ) // used for held
+}
+
+void function SendAnnouncementMessageWaiting( entity player, string text, float sec )
+{
+	wait sec
+	NSSendAnnouncementMessageToPlayer( player, text, "", < 255, 0, 0 >, 255, 5 )
 }
 
 void function DropFlagIfPhased( entity player, entity flag )
@@ -467,7 +474,7 @@ void function ResetFlag( entity flag )
 void function CaptureFlag( entity player, entity flag )
 {
 	player.s.CruiseMissile += 1
-	NSSendAnnouncementMessageToPlayer( player, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
+	thread SendAnnouncementMessageWaiting( player, "獲得巡飛彈！", 2 )
 
 	// can only capture flags during normal play or sudden death
 	if (GetGameState() != eGameState.Playing && GetGameState() != eGameState.SuddenDeath)

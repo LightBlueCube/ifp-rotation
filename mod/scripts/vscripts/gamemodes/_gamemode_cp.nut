@@ -50,7 +50,7 @@ void function GamemodeCP_Init()
 	AITdm_SetReapersPerTeam( 1 )
 
 	// tempfix specifics
-	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+	SetShouldPlayDefaultMusic( false ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
 }
 
@@ -71,7 +71,7 @@ void function OnPrematchStart()
 
 void function OnLastMinute()
 {
-	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 50 + 2
+	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 100 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -689,9 +689,9 @@ void function HardpointThink( HardpointStruct hardpoint )
 		{
 			lastScoreTime = currentTime
 			if ( GetHardpointState( hardpoint ) == CAPTURE_POINT_STATE_AMPED )
-				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 10 ) )
+				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 10, 500 ) )
 			else if( GetHardpointState( hardpoint) >= CAPTURE_POINT_STATE_CAPTURED)
-				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 5 ) )
+				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 5, 500 ) )
 		}
 
 		foreach(entity player in hardpoint.imcCappers)

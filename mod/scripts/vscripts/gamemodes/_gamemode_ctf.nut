@@ -72,17 +72,17 @@ void function CTFScoreEventSetUp()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.20 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.30 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.80 )
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 10.0 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
 
 	// override settings
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10 )
@@ -107,7 +107,7 @@ void function OnLastMinute()
 		if( IsValid( player.GetPetTitan() ) )
 			continue
 
-		thread CreateTitanForPlayerAndHotdrop( player, GetTitanReplacementPoint( player, false ) )
+		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.EyePosition(), AnglesToForward( < 90, 0, 0 > ), < 90, 0, 0 >, false ) )
 	}
 }
 

@@ -431,17 +431,17 @@ void function AT_ScoreEventsValueSetUp()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.20 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.30 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.80 )
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 1.0 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 10.0 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 0.2 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
 
 	// override settings
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10, 0.5 ) // mostly never called cuz it's overwriten by AttritionPilotKilled
@@ -688,6 +688,9 @@ int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam ) + GetNonApplyMoneyFromTeam( otherTeam )
 	float addition = float( otherTeamScore - teamScore ) / balanceAmount
 
+	printt( "score"+ floatScore +" addition"+ addition +" after"+  round( floatScore * addition ) )
+	printt( "score"+ teamScore +"-"+ otherTeamScore )
+
 	if( addition >= 0 && addition <= 1)
 		return int( floatScore )
 	if( addition >= 0 )
@@ -699,6 +702,7 @@ int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 
 	addition = float( teamScore - otherTeamScore + balanceAmount ) / ( balanceAmount *  2 )
 
 	addition = 1 / addition
+	printt( "2score"+ floatScore +" addition"+ addition +" after"+  int( floatScore * addition ) )
 
 	if( addition > 0.5 )
 		addition = 0.5

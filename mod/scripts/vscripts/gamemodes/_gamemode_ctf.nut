@@ -107,7 +107,7 @@ void function OnLastMinute()
 		if( IsValid( player.GetPetTitan() ) )
 			continue
 
-		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.EyePosition(), AnglesToForward( < 90, 0, 0 > ), < 90, 0, 0 >, false ) )
+		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )
 	}
 }
 

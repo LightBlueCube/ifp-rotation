@@ -142,8 +142,8 @@ void function OnLastMinute()
 {
 	int team = TEAM_IMC
 	int otherTeam = GetOtherTeam( team )
-	int teamScore = GameRules_GetTeamScore( team ) + GetNonApplyMoneyFromTeam( team )
-	int otherTeamScore = GameRules_GetTeamScore( otherTeam ) + GetNonApplyMoneyFromTeam( otherTeam )
+	int teamScore = GameRules_GetTeamScore( team )
+	int otherTeamScore = GameRules_GetTeamScore( otherTeam )
 
 	int teamScoreAddition = abs( otherTeam - team ) / 100 + 2
 	SetTeamScoreAddition( teamScoreAddition )
@@ -153,6 +153,18 @@ void function OnLastMinute()
 			continue
 		NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍金額獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
+
+	// banking phase
+	SetGlobalNetBool( "preBankPhase", false )
+	SetGlobalNetTime( "AT_bankStartTime", Time() )
+	SetGlobalNetTime( "AT_bankEndTime", Time() + 60 )
+	SetGlobalNetBool( "banksOpen", true )
+
+	foreach ( entity player in GetPlayerArray() )
+		Remote_CallFunction_NonReplay( player, "ServerCallback_AT_BankOpen" )
+
+	foreach ( entity bank in file.banks )
+		thread AT_BankActiveThink( bank )
 }
 
 void function RateSpawnpoints_AT( int checkclass, array<entity> spawnpoints, int team, entity player )
@@ -669,64 +681,7 @@ void function AT_AddPlayerBonusPoints( entity player, int amount )
 
 	// add to scoreboard
 	player.AddToPlayerGameStat( PGS_SCORE, amount )
-	amount = AT_ScoreAdditionFromTeam( player.GetTeam(), amount, 400 )
 	AT_SetPlayerBonusPoints( player, player.GetPlayerNetInt( "AT_bonusPoints" ) + ( player.GetPlayerNetInt( "AT_bonusPoints256" ) * 256 ) + amount )
-}
-
-int function AT_ScoreAdditionFromTeam( int team, int score, int balanceAmount = 150 )
-{
-	if( score <= 0 )
-		return score
-
-	float floatScore = float( score * GetTeamScoreAddition() )
-
-	if( team != TEAM_IMC && team != TEAM_MILITIA )
-		return int( floatScore )
-
-	int otherTeam = GetOtherTeam( team )
-	int teamScore = GameRules_GetTeamScore( team ) + GetNonApplyMoneyFromTeam( team )
-	int otherTeamScore = GameRules_GetTeamScore( otherTeam ) + GetNonApplyMoneyFromTeam( otherTeam )
-	float addition = float( otherTeamScore - teamScore ) / balanceAmount
-
-	printt( "score"+ floatScore +" addition"+ addition +" after"+  round( floatScore * addition ) )
-	printt( "score"+ teamScore +"-"+ otherTeamScore )
-
-	if( addition >= 0 && addition <= 1)
-		return int( floatScore )
-	if( addition >= 0 )
-		return round( floatScore * addition )
-
-    if( teamScore - balanceAmount <= otherTeamScore )
-		return int( floatScore )
-
-	addition = float( teamScore - otherTeamScore + balanceAmount ) / ( balanceAmount *  2 )
-
-	addition = 1 / addition
-	printt( "2score"+ floatScore +" addition"+ addition +" after"+  int( floatScore * addition ) )
-
-	if( addition > 0.5 )
-		addition = 0.5
-	return round( floatScore * addition )
-}
-
-int function round( float num )
-{
-	int i = int( num )
-	if( num - i < 0.5)
-		return i
-	return i + 1
-}
-
-int function GetNonApplyMoneyFromTeam( int team )
-{
-	int money = 0
-	foreach( player in GetPlayerArray() )
-	{
-		if( !IsValid( player ) )
-			continue
-		money += AT_GetPlayerBonusPoints( player )
-	}
-	return money
 }
 
 int function AT_GetPlayerBonusPoints( entity player )
@@ -778,6 +733,9 @@ void function AT_SetPlayerEarnedPoints( entity player, int amount )
 // damaging bounty
 void function AT_AddPlayerBonusPointsForBossDamaged( entity player, entity victim, int amount, var damageInfo )
 {
+	if( amount > 0 )
+		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 400 )
+
 	AT_AddPlayerBonusPoints( player, amount )
 	// update score difference and scoreboard
 	AT_AddToPlayerTeamScore( player, amount )
@@ -800,6 +758,9 @@ void function AT_AddPlayerBonusPointsForBossDamaged( entity player, entity victi
 
 void function AT_AddPlayerBonusPointsForEntityKilled( entity player, int amount, var damageInfo, int extraBonus = 0 )
 {
+	if( amount > 0 )
+		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 400 )
+
 	AT_AddPlayerBonusPoints( player, amount + extraBonus )
 
 	// send servercallback for damaging

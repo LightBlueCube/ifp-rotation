@@ -790,6 +790,8 @@ void function KillPlayerOnGround( var player )
 		if( player.IsHuman() && IsValid( player.GetParent() ) )
 			break
 	}
+	DeployAndEnableWeapons( expect entity( player ) )
+	WaitFrame()
 	player.Die( null, null, { damageSourceId = eDamageSourceId.fall } )
 }
 

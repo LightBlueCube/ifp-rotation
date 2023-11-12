@@ -90,6 +90,7 @@ void function RestoreKillStreak( entity player )
 				player.s.NukeTitan += RandomInt( 4 ) + 1
 
 			player.s.GiveRandomKillStreak <- false
+			RandomKillStreakPlayers.removebyvalue( player.GetUID() )
 		}
 	}
 

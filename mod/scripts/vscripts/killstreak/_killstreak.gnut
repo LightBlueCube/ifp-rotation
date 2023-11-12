@@ -5,8 +5,8 @@ global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
 
 struct{
-	int nukeTitan = 5
-	int cruiseMissile = 12
+	int nukeTitan = 4
+	int cruiseMissile = 13
 	int vtol = 20
 	int nuclearBomb = 20
 }file

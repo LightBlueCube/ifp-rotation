@@ -145,7 +145,7 @@ void function OnLastMinute()
 	int teamScore = GameRules_GetTeamScore( team )
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam )
 
-	int teamScoreAddition = abs( otherTeam - team ) / 100 + 2
+	int teamScoreAddition = abs( otherTeam - teamScore ) / 200 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -734,7 +734,7 @@ void function AT_SetPlayerEarnedPoints( entity player, int amount )
 void function AT_AddPlayerBonusPointsForBossDamaged( entity player, entity victim, int amount, var damageInfo )
 {
 	if( amount > 0 )
-		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 400 )
+		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 200 )
 
 	AT_AddPlayerBonusPoints( player, amount )
 	// update score difference and scoreboard
@@ -759,7 +759,7 @@ void function AT_AddPlayerBonusPointsForBossDamaged( entity player, entity victi
 void function AT_AddPlayerBonusPointsForEntityKilled( entity player, int amount, var damageInfo, int extraBonus = 0 )
 {
 	if( amount > 0 )
-		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 400 )
+		amount = ScoreAdditionFromTeam( player.GetTeam(), amount, 200 )
 
 	AT_AddPlayerBonusPoints( player, amount + extraBonus )
 

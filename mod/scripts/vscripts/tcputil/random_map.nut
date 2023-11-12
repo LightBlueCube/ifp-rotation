@@ -145,7 +145,7 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	if( mode == "aitdm" )
 	{
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 18" )
 	}
 	if( mode == "at" )
 	{
@@ -166,7 +166,7 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	if( mode == "fw" )
 	{
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 100" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
 	}
 	if( mode == "ttdm" )
 	{

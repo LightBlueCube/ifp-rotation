@@ -689,9 +689,9 @@ void function HardpointThink( HardpointStruct hardpoint )
 		{
 			lastScoreTime = currentTime
 			if ( GetHardpointState( hardpoint ) == CAPTURE_POINT_STATE_AMPED )
-				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 10, 500 ) )
+				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 10, 300 ) )
 			else if( GetHardpointState( hardpoint) >= CAPTURE_POINT_STATE_CAPTURED)
-				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 5, 500 ) )
+				AddTeamScore( hardpointEnt.GetTeam(), ScoreAdditionFromTeam( hardpointEnt.GetTeam(), 5, 300 ) )
 		}
 
 		foreach(entity player in hardpoint.imcCappers)

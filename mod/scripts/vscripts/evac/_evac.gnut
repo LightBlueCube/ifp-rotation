@@ -15,7 +15,7 @@ const float EVAC_ARRIVAL_TIME = 40.0
 const float EVAC_WAIT_TIME = 18.0
 
 const int EVAC_SHIP_HEALTH = 40000
-const int EVAC_SHIP_SHIELDS = 5000
+const int EVAC_SHIP_SHIELDS = 10000
 
 // we don't use these because they're busted, just keeping them
 const array<string> EVAC_EMBARK_ANIMS_1P = [
@@ -385,6 +385,15 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_idle", evacNode )
 
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		if( player.GetTeam() != evacTeam )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離有獎勵！", < 50, 50, 225 >, 255, 5 )
+	}
+
 	// hover sound
 	EmitSoundOnEntity( dropship, evacShip.hoverSound )
 
@@ -655,7 +664,7 @@ void function EvacDropshipDamaged( entity evacShip, var damageInfo )
 {
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	if( damageSourceID == damagedef_nuclear_core || damageSourceID == eDamageSourceId.mp_weapon_cruise_missile )
-		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * EVAC_SHIP_DAMAGE_MULTIPLIER_AGAINST_NUCLEAR_CORE )
+		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * 0.2 )
 }
 
 void function WarpInEffectEvacShip( entity dropship )

@@ -1,5 +1,6 @@
 untyped
 global function KillStreak_Init
+global function GetKillStreakData
 global function KillStreakEnable
 global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
@@ -26,6 +27,16 @@ void function KillStreak_Init()
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+}
+
+table function GetKillStreakData()
+{
+	return {
+		nukeTitan = file.nukeTitan,
+		cruiseMissile = file.cruiseMissile,
+		vtol = file.vtol,
+		nuclearBomb = file.nuclearBomb
+	}
 }
 
 bool function KillStreakEnable()

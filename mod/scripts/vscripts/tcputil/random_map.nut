@@ -42,28 +42,13 @@ void function RandomMap_Init()
 		return
 	}
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
-	if( [ "mp_rise", "mp_eden" ].contains( GetMapName() ) )
-	{
+	if( [ "mp_rise", "mp_eden" ].contains( GetMapName() ) || RandomInt( 3 ) == 0 )
 		AddCallback_OnClientConnected( OnClientConnected )
-	}
 }
 
 void function OnClientConnected( entity player )
 {
     thread SetPlayerToNightSky( player )
-}
-
-void function SetPlayerToNightSky( entity player )
-{
-	player.EndSignal( "OnDestroy" )
-	svGlobal.levelEnt.EndSignal( "NukeExplode" )
-	player.SetSkyCamera( GetEnt( SKYBOXSPACE ) )
-
-	for( ;; )
-	{
-		WaitFrame()
-		Remote_CallFunction_NonReplay( player, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
-	}
 }
 
 void function GameStateEnter_Postmatch()
@@ -166,13 +151,18 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	if( mode == "fw" )
 	{
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 100" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
 	}
 	if( mode == "ttdm" )
 	{
 		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
 		ServerCommand( "setplaylistvaroverrides \"timelimit\" 10" )
+	}
+	if( mode == "lts" )
+	{
+		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 0" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 3" )
 	}
 }
 

@@ -66,6 +66,8 @@ void function LastMinThreaded()
 
 	if( GameRules_GetGameMode() == "ctf" )
 		timeLimit = timeLimit / 2
+	if( GameRules_GetGameMode() == "lts" )
+		timeLimit += 30		//will be change to last 30sec
 
 	wait timeLimit - 60
 	foreach( player in GetPlayerArray() )

@@ -145,7 +145,7 @@ void function OnLastMinute()
 	int teamScore = GameRules_GetTeamScore( team )
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam )
 
-	int teamScoreAddition = abs( otherTeam - teamScore ) / 500 + 2
+	int teamScoreAddition = abs( otherTeamScore - teamScore ) / 200 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -153,18 +153,6 @@ void function OnLastMinute()
 			continue
 		NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍金額獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
-
-	// banking phase
-	SetGlobalNetBool( "preBankPhase", false )
-	SetGlobalNetTime( "AT_bankStartTime", Time() )
-	SetGlobalNetTime( "AT_bankEndTime", Time() + 60 )
-	SetGlobalNetBool( "banksOpen", true )
-
-	foreach ( entity player in GetPlayerArray() )
-		Remote_CallFunction_NonReplay( player, "ServerCallback_AT_BankOpen" )
-
-	foreach ( entity bank in file.banks )
-		thread AT_BankActiveThink( bank )
 }
 
 void function RateSpawnpoints_AT( int checkclass, array<entity> spawnpoints, int team, entity player )

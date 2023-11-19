@@ -15,6 +15,7 @@ const INTRO_DROPSHIP_CUTOFF = 2000
 struct
 {
 	table< string, array<string> > npcWeaponsTable // npcs have their default weapon in aisettings file
+	table< entity, entity> npcBatteryTable
 } file
 
 void function AiGameModes_Init()
@@ -62,10 +63,12 @@ void function AiGameModes_SpawnDropShip( vector pos, vector rot, int team, int c
 		//guy.EnableNPCFlag( NPC_ALLOW_PATROL | NPC_ALLOW_INVESTIGATE | NPC_ALLOW_HAND_SIGNALS | NPC_ALLOW_FLEE )
 	}
 
+	if( guys.len() >= 2 )
+		GiveNPCBattery( guys[ RandomInt( guys.len() - 1 ) + 1 ] )
+
 	if ( squadHandler != null )
 		thread squadHandler( guys )
 }
-
 
 void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string content /*( ͡° ͜ʖ ͡°)*/, void functionref( array<entity> guys ) squadHandler = null, int droppodFlag = 0 )
 {
@@ -97,11 +100,47 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 		}
 	}
 
+	if( content == "npc_soldier" && guys.len() >= 2 )
+		GiveNPCBattery( guys[ RandomInt( guys.len() - 1 ) + 1 ] )
+
 	ActivateFireteamDropPod( pod, guys )
 
 	// start searching for enemies
 	if ( squadHandler != null )
 		thread squadHandler( guys )
+}
+
+void function GiveNPCBattery( entity npc )
+{
+	entity battery = Rodeo_CreateBatteryPack()
+	int random = RandomInt( 10 )
+	if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
+	{
+		battery.SetSkin( 2 )
+	}
+	battery.SetParent( npc, "BATTERY_ATTACH" )
+	battery.MarkAsNonMovingAttachment()
+	battery.RemoveFromSpatialPartition()
+	file.npcBatteryTable[ npc ] <- battery
+
+	AddEntityCallback_OnFinalDamaged( npc, DropNpcBattery )
+}
+
+void function DropNpcBattery( entity npc, var damageInfo )
+{
+	if( !( npc in file.npcBatteryTable ) )
+		return
+
+	entity battery = file.npcBatteryTable[ npc ]
+	if( !IsValid( battery ) )
+		return
+
+	battery.Show()
+	battery.ClearParent()
+	battery.AddToSpatialPartition()
+	battery.SetAngles( <0, 0, 0 > )
+	battery.SetVelocity( < 0, 0, 1 > )
+	PutEntityInSafeSpot( battery, npc, null, npc.GetOrigin(), battery.GetOrigin() )
 }
 
 void function SetUpSpecialistGrunt( entity npc )

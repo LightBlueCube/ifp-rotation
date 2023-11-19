@@ -110,6 +110,24 @@ void function SuperSpectreNukes( entity npc, entity attacker )
 	PlayFX( $"P_sup_spectre_death_nuke", origin, npc.GetAngles() )
 
 	thread SuperSpectreNukeDamage( npc.GetTeam(), origin, attacker )
+
+	entity newBattery = Rodeo_CreateBatteryPack()
+	newBattery.s.touchEnabledTime = Time() + 0.3
+	vector direction = AnglesToForward( < 0, 360.0, 0 > )
+	newBattery.SetOrigin( npc.GetWorldSpaceCenter() + direction * 30 )
+	newBattery.SetAngles( <0, 0, 0 > )
+	vector baseVelocity = npc.GetVelocity()
+	baseVelocity.z = 0
+	newBattery.SetVelocity( baseVelocity + direction * 100 + <0, 0, 1> )
+
+	int random = RandomInt( 10 )
+	if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
+	{
+		newBattery.SetSkin( 2 )
+	}
+	Battery_StopFX( newBattery )
+	thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
+
 	WaitFrame() // so effect has time to grow and cover the swap to gibs
 	npc.Gib( <0,0,100> )
 }
@@ -133,6 +151,22 @@ void function DoSuperSpectreDeath( entity npc, var damageInfo )
 		if ( giveBattery )
 			SpawnTitanBatteryOnDeath( npc, null )
 
+		entity newBattery = Rodeo_CreateBatteryPack()
+		newBattery.s.touchEnabledTime = Time() + 0.3
+		vector direction = AnglesToForward( < 0, 360.0, 0 > )
+		newBattery.SetOrigin( npc.GetWorldSpaceCenter() + direction * 30 )
+		newBattery.SetAngles( <0, 0, 0 > )
+		vector baseVelocity = npc.GetVelocity()
+		baseVelocity.z = 0
+		newBattery.SetVelocity( baseVelocity + direction * 100 + <0, 0, 1> )
+
+		int random = RandomInt( 10 )
+		if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
+		{
+			newBattery.SetSkin( 2 )
+		}
+		Battery_StopFX( newBattery )
+		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
 		return
 	}
 

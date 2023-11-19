@@ -157,7 +157,7 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 	{
 		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
 		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 10" )
+		ServerCommand( "setplaylistvaroverrides \"timelimit\" 8" )
 	}
 	if( mode == "lts" )
 	{

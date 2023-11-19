@@ -23,9 +23,23 @@ void function GamemodeTTDM_Init()
 	Rodeo_SetBatteryPickupAllowed( true )
 	AddCallback_OnLastMinute( OnLastMinute )
 	SetKillStreakEnable( false )
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 
 	// tempfix specifics
 	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	thread DeployAndEnableWeapons_AfterFrame( player )
+}
+
+void function DeployAndEnableWeapons_AfterFrame( entity player )
+{
+	WaitFrame()
+	if( IsValid( player ) )
+		if( IsAlive( player ) )
+			DeployAndEnableWeapons( player )
 }
 
 void function OnLastMinute()

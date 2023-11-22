@@ -588,40 +588,23 @@ void function SquadHandler( array<entity> guys )
 // can't name it "OnNPCLeeched()" because there's a deprecated function with same name... and it's globalized. yay.
 void function AITdm_OnNPCLeeched( entity npc, entity player )
 {
-	// Set Owner so we can filter in HandleScore
-	// not a good idea. score could be handled by GetBossPlayer()
-	// setting an owner will make entity have no collision with their owner
-	//npc.SetOwner( player )
-	npc.ai.preventOwnerDamage = true // this is required so we don't kill our spectres
-
-	// adding score
-	// they can be re-hacked and we need to prevent gain score multiple times
-	if ( !( "givenAttritionScore" in npc.s ) )
+	int playerScore = 0
+	switch ( npc.GetClassName() )
 	{
-		int playerScore = 0
-		switch ( npc.GetClassName() )
-		{
-			case "npc_soldier":
-			case "npc_spectre":
-			case "npc_stalker":
-				playerScore = 1
-				break
-			case "npc_super_spectre":
-				playerScore = 3
-				break
-			default:
-				playerScore = 0
-				break
-		}
-		// Add score + update network int to trigger the "Score +n" popup
-		AddAITdmPlayerTeamScore( player, playerScore )
-		npc.s.givenAttritionScore <- true // mark the npc as already given score to player
+		case "npc_soldier":
+		case "npc_spectre":
+		case "npc_stalker":
+			playerScore = 1
+			break
+		case "npc_super_spectre":
+			playerScore = 3
+			break
+		default:
+			playerScore = 0
+			break
 	}
-
-	// disable leech on this spectre, don't let them to be multiple-leeched by diffrent team...
-	// reverted. it is vanilla behavior! and it's pretty funny
-	//DisableLeeching( npc )
-	//npc.UnsetUsable()
+	// Add score + update network int to trigger the "Score +n" popup
+	AddAITdmPlayerTeamScore( player, playerScore )
 }
 
 // Same as SquadHandler, just for reapers

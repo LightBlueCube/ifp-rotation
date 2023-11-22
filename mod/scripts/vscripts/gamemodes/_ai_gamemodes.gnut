@@ -153,8 +153,8 @@ void function SetUpSpecialistGrunt( entity npc )
 	npc.DisableNPCFlag( NPC_ALLOW_FLEE | NPC_ALLOW_HAND_SIGNALS | NPC_USE_SHOOTING_COVER | NPC_CROUCH_COMBAT )
 	thread WaitForShieldCaptainDrop( npc ) // start shield after being clear parented
 
-	npc.SetMaxHealth( 200 )
-	npc.SetHealth( 200 )
+	npc.SetShieldHealthMax( 100 )
+	npc.SetShieldHealth( 100 )
 }
 
 void function WaitForShieldCaptainDrop( entity npc )

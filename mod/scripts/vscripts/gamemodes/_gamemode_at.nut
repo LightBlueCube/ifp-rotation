@@ -49,7 +49,7 @@ const int AT_DROPPOD_SQUADS_ALLOWED_ON_FIELD = 4 // default is 4 droppod squads 
 
 // Titan bounty settings
 const float AT_BOUNTY_TITAN_CHECK_DELAY = 10.0    // wait for bounty titans landing before we start checking their life state
-const float AT_BOUNTY_TITAN_HEALTH_MULTIPLIER = 4 // TODO: Verify this
+const float AT_BOUNTY_TITAN_HEALTH_MULTIPLIER = 6 // TODO: Verify this
 
 // Titan boss settings, check sh_gamemode_at.nut for more info
 const array<string> AT_BOUNTY_TITANS_AI_SETTINGS =

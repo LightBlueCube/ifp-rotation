@@ -104,7 +104,7 @@ void function OnLastMinute()
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
 
-		if( IsValid( player.GetPetTitan() ) )
+		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
 			continue
 
 		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )

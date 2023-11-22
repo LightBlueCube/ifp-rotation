@@ -120,50 +120,63 @@ void function RandMap( string mode )
 	GameRules_ChangeMap( map, mode )
 }
 
-// utils shared //
+
+// WARNING!!!! Respawn doesnt give way to clear the playlist overrides without map is mp_lobby
+// so if u added a new playlistvar overrides, then u also need add this playlistvar's default value in "baseData" or other gamemodes data
+table<string, table<string, int> > playlistData = {
+
+	baseData = {
+		max_players = 12
+		titan_shield_regen = 1
+		respawn_delay = 0
+		enable_spectre_hacking = 1
+	}
+
+	aitdm = {
+		scorelimit = 2147483647
+		timelimit = 18
+	}
+
+	at = {
+		scorelimit = 2147483647
+		timelimit = 16
+	}
+
+	cp = {
+		scorelimit = 2147483647
+		timelimit = 12
+	}
+
+	ctf = {
+		respawn_delay = 0
+		scorelimit = 5
+		timelimit = 10
+	}
+
+	fw = {
+		scorelimit = 100
+		timelimit = 16
+	}
+
+	ttdm = {
+		respawn_delay = 0
+		scorelimit = 2147483647
+		timelimit = 8
+	}
+
+}
 
 void function RandomGamemode_SetPlaylistVarOverride( string mode )
 {
+	if( !( mode in playlistData ) )
+		unreachable	// crash the server
+
 	ServerCommand( "mp_gamemode "+ mode )
 	ServerCommand( "setplaylist "+ mode )
-
-	if( mode == "aitdm" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 18" )
-	}
-	if( mode == "at" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
-	}
-	if( mode == "cp" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 12" )
-	}
-	if( mode == "ctf" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 5" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 10" )
-	}
-	if( mode == "fw" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 100" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 16" )
-	}
-	if( mode == "ttdm" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"respawn_delay\" 0" )
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 2147483647" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 8" )
-	}
-	if( mode == "lts" )
-	{
-		ServerCommand( "setplaylistvaroverrides \"scorelimit\" 0" )
-		ServerCommand( "setplaylistvaroverrides \"timelimit\" 3" )
-	}
+	foreach( string key, int value in playlistData[ "baseData" ] )
+		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
+	foreach( string key, int value in playlistData[ mode ] )
+		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
 }
 
 string function GetModeName( string mode )

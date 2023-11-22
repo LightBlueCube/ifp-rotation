@@ -416,7 +416,7 @@ void function ApplyWeaponAmpForDuration_Threaded( entity weapon, float duration 
 
 	// append the first burnmod for weapon by default
 	array<string> burnMods = GetWeaponBurnMods( weapon.GetWeaponClassName() )
-	string mainBurnMod = "" 
+	string mainBurnMod = ""
 	if ( burnMods.len() > 0 )
 		mainBurnMod = burnMods[0]
 	//print( "mainBurnMod: " + mainBurnMod )
@@ -524,7 +524,7 @@ void function PlayerUsesMaphackBurncardThreaded( entity player )
 		{
 			if ( !results.shouldCleanup ) // Map hack ended when sonar wasn't active, no cleanup needed
 				return
-			
+
 			foreach ( entity ent in affectedEntities )
 			{
 				if ( IsValid( ent ) )
@@ -547,7 +547,7 @@ void function PlayerUsesMaphackBurncardThreaded( entity player )
 
 		if ( IsAlive( player ) )
 			Remote_CallFunction_Replay( player, "ServerCallback_SonarPulseFromPosition", player.GetOrigin().x, player.GetOrigin().y, player.GetOrigin().z, SONAR_GRENADE_RADIUS )
-		
+
 		foreach ( entity ent in entities )
 		{
 			if ( !IsValid( ent ) ) // Not sure why we can get invalid entities at this point
@@ -719,7 +719,7 @@ void function PutPhaseRewindedPlayerInSafeSpot( entity player, int severity )
 
     if( PutEntityInSafeSpot( player, player, null, < baseOrigin.x, baseOrigin.y - severity, baseOrigin.z >, baseOrigin ) )
         return
- 
+
     if( PutEntityInSafeSpot( player, player, null, < baseOrigin.x + severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
         return
 
@@ -791,7 +791,7 @@ void function StartTrackingPositions( entity player )
 
 	while ( 1 )
 	{
-		if ( player.p.burnCardPhaseRewindStruct.phaseRetreatShouldSave && !player.IsTitan() )
+		if ( player.p.burnCardPhaseRewindStruct.phaseRetreatShouldSave && !player.IsTitan() && !player.s.usingCruiseMissile )
 		{
 			vector origin = player.GetOriginOutOfTraversal()
 			vector angles = player.GetAngles()

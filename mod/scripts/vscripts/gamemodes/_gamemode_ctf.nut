@@ -44,7 +44,7 @@ void function CaptureTheFlag_Init()
 	AddCallback_OnPilotBecomesTitan( DropFlagForBecomingTitan )
 
 	AddCallback_OnLastMinute( OnLastMinute )
-	SetBetterRespawnPointEnable( false )
+	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender" ] )
 	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_defender", "mp_weapon_mgl" ] )
@@ -67,6 +67,11 @@ void function CaptureTheFlag_Init()
 	// tempfix specifics
 	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
+}
+
+void function OnWinnerDetermined()
+{
+	SetRespawnsEnabled( true )
 }
 
 void function CTFScoreEventSetUp()

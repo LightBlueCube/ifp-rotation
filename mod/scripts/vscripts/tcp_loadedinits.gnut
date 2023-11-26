@@ -5,6 +5,9 @@ void function InfiniteFirepower_Init()
 {
 	RandomMap_Init()    //随机换图
 
+	if( GetConVarString( "random_map_playlist" ) == "" && GetConVarString( "random_mode_playlist" ) == "" )
+		return
+
 	TitanChange_Init()    //至尊泰坦替换
 
 	KillStreak_Init()    //连杀系统

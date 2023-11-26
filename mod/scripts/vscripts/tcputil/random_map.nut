@@ -111,11 +111,10 @@ void function RandMap( string mode )
 	string map = MAP_PLAYLIST[i]
 	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
 
-	StoreStringArrayIntoConVar( "random_map_playlist", MAP_PLAYLIST )
-	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST )
-
 	wait GAME_POSTMATCH_LENGTH - 0.1
 
+	StoreStringArrayIntoConVar( "random_map_playlist", MAP_PLAYLIST )
+	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST )
 	RandomGamemode_SetPlaylistVarOverride( mode )
 	GameRules_ChangeMap( map, mode )
 }

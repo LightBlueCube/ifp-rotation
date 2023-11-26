@@ -1,3 +1,4 @@
+untyped
 global function InfiniteFirepower_Init
 
 void function InfiniteFirepower_Init()
@@ -30,8 +31,15 @@ void function InfiniteFirepower_Init()
 		nuclearBomb = 20
 		}
 	)
+	SetRandomKillStreakData( RandomKillStreakFunc )
 }
 
+void function RandomKillStreakFunc( entity player )
+{
+	player.s.NukeTitan += RandomInt( 4 )
+	if( player.s.NukeTitan <= 0 )
+		player.s.CruiseMissile += 1
+}
 
 //// dev unused ////
 

@@ -134,7 +134,7 @@ table<string, table<string, int> > playlistData = {
 
 	aitdm = {
 		scorelimit = 2147483647
-		timelimit = 18
+		timelimit = 16
 	}
 
 	at = {

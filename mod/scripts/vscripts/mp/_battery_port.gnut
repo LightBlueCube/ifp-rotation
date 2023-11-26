@@ -29,6 +29,7 @@ void function TryUseTurretBatteryPort( entity player, entity batteryPort )
 
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "BatteryActivate" ) // never allow jumping off after battery activated
 	player.EndSignal( "ScriptAnimStop" ) // so you can jump off animation
 	AddButtonPressedPlayerInputCallback( player, IN_JUMP, ForceStopUseBatteryPort )
 
@@ -60,8 +61,6 @@ void function PlayerApplesBatteryPackToPort( entity player, entity batteryPort )
 	result.success <- false
 	batteryPort.s.beingUsed = true
 
-	BatteryPortSequenceStruct dataStruct = DisableCloakBeforeBatteryPortSequence( player )
-
 	// these are from _rodeo_titan.gnut
 	entity battery = GetBatteryOnBack( player )
 	battery.Hide() //Hide it because the animation has a battery model already
@@ -83,7 +82,7 @@ void function PlayerApplesBatteryPackToPort( entity player, entity batteryPort )
 	player.p.rodeoAnimTempProps.append( tempBattery1p )
 
 	OnThreadEnd(
-		function() : ( battery, batteryPort, player, result, dataStruct )
+		function() : ( battery, batteryPort, player, result )
 		{
 			if ( IsValid( battery ) ) // animation interrupted, otherwise the battery will be destroyed
 			{
@@ -108,7 +107,6 @@ void function PlayerApplesBatteryPackToPort( entity player, entity batteryPort )
 				PutEntityInSafeSpot( player, player, null, player.GetOrigin() + <0, 0, 32>, player.GetOrigin() )
 
 				CleanUpBatterySequenceForPlayer( player )
-				RestoreCloakAfterBatteryPortSequence( player, dataStruct )
 			}
 		}
 	)
@@ -133,7 +131,7 @@ void function WaitForActivateBattery( entity player, entity battery, entity batt
 {
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
-	player.EndSignal( "ScriptAnimStop" ) // so you can jump off animation
+//	player.EndSignal( "ScriptAnimStop" ) // so you can jump off animation
 	battery.EndSignal( "OnDestroy" )
 
 	player.WaitSignal( "BatteryActivate" ) // this is registered in _gamemode_fw.nut!
@@ -142,16 +140,12 @@ void function WaitForActivateBattery( entity player, entity battery, entity batt
 
 void function ApplyBatteryToBatteryPort( entity player, entity batteryPort )
 {
-	printt( "batteryportdebug "+ player +" /"+ player.GetPlayerNetInt( "batteryCount" ) +" end" )
-
 	if ( player.GetPlayerNetInt( "batteryCount" ) <= 0 ) // player actually not carrying a battery
 		return
-	printt( "batteryportdebug" )
+
 	entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
-	printt( "batteryportdebug "+ battery )
 	if ( !IsValid( battery ) )
 		return
-	printt( "batteryportdebug1 "+ battery )
 
 	// player can apply battery
 
@@ -164,45 +158,6 @@ void function ApplyBatteryToBatteryPort( entity player, entity batteryPort )
 
 	// all things done, destroy this batt
 	battery.Destroy()
-}
-
-// for disabling cloak
-struct BatteryPortSequenceStruct
-{
-	bool wasCloaked = false
-	float cloakEndTime = 0.0
-}
-
-BatteryPortSequenceStruct function DisableCloakBeforeBatteryPortSequence( entity player )
-{
-	BatteryPortSequenceStruct dataStruct
-	if ( !IsCloaked( player ) )
-		return dataStruct // empty struct!
-
-	dataStruct.wasCloaked = true
-	dataStruct.cloakEndTime = player.GetCloakEndTime()
-	DisableCloak( player, 0.0 )
-
-	return dataStruct
-}
-
-bool function RestoreCloakAfterBatteryPortSequence( entity player, BatteryPortSequenceStruct dataStruct )
-{
-	if ( !IsAlive( player ) )
-		return false
-
-	if ( !dataStruct.wasCloaked  )
-		return false
-
-	if ( dataStruct.cloakEndTime <= 0.0 )
-		return false
-
-	float remainingCloakDuration = max( 0.0, dataStruct.cloakEndTime - Time() )
-	if ( remainingCloakDuration <= CLOAK_FADE_IN ) //Has to be greater than 1.0 fade in duration, otherwise will cloak forever
-		return false
-
-	EnableCloak( player, remainingCloakDuration, CLOAK_FADE_IN )
-	return true
 }
 
 void function CleanUpBatterySequenceForPlayer( entity player )

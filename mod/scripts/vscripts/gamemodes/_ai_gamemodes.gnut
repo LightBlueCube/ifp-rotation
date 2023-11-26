@@ -118,6 +118,7 @@ void function GiveNPCBattery( entity npc )
 	{
 		battery.SetSkin( 2 )
 	}
+	Battery_StartFX( battery )
 	battery.SetParent( npc, "BATTERY_ATTACH" )
 	battery.MarkAsNonMovingAttachment()
 	battery.RemoveFromSpatialPartition()

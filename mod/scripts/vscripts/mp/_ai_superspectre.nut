@@ -125,8 +125,7 @@ void function SuperSpectreNukes( entity npc, entity attacker )
 	{
 		newBattery.SetSkin( 2 )
 	}
-	Battery_StopFX( newBattery )
-	thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
+	Battery_StartFX( newBattery )
 
 	WaitFrame() // so effect has time to grow and cover the swap to gibs
 	npc.Gib( <0,0,100> )
@@ -165,8 +164,7 @@ void function DoSuperSpectreDeath( entity npc, var damageInfo )
 		{
 			newBattery.SetSkin( 2 )
 		}
-		Battery_StopFX( newBattery )
-		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
+		Battery_StartFX( newBattery )
 		return
 	}
 

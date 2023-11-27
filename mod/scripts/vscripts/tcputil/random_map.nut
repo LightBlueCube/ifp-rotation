@@ -137,6 +137,7 @@ table<string, table<string, int> > playlistData = {
 	}
 
 	at = {
+		enable_spectre_hacking = 0
 		scorelimit = 2147483647
 		timelimit = 16
 	}

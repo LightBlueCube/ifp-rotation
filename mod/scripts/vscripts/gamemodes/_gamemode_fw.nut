@@ -182,11 +182,20 @@ void function OnLastMinute()
 			continue
 		turret.Die()
 	}
+	foreach( val in file.harvesters )
+	{
+		if( !IsValid( val.harvester ) )
+			continue
+		if( !IsAlive( val.harvester ) )
+			continue
+		val.harvester.SetShieldHealth( 0 )
+		val.harvester.SetShieldHealthMax( 0 )
+	}
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "所有炮塔已摧毀！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( player, "采集機護盾離線！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
 		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
 			continue
@@ -2185,11 +2194,11 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 	if ( damageSourceID in file.harvesterDamageSourceMods )
 		DamageInfo_ScaleDamage( damageInfo, file.harvesterDamageSourceMods[ damageSourceID ] )
 
-	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10 ) ) / 100.0
+	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10, 0.0 ) ) / 100.0
 	if( balanceFrac == 0 || harvester.GetShieldHealth() != 0 )
 		return
-	if( balanceFrac < 0.5 )
-		balanceFrac = 0.5
+	if( balanceFrac < 0.25 )
+		balanceFrac = 0.25
 	if( balanceFrac > 4.0 )
 		balanceFrac = 4.0
 	DamageInfo_ScaleDamage( damageInfo, balanceFrac )

@@ -15,7 +15,6 @@ const INTRO_DROPSHIP_CUTOFF = 2000
 struct
 {
 	table< string, array<string> > npcWeaponsTable // npcs have their default weapon in aisettings file
-	table< entity, entity> npcBatteryTable
 } file
 
 void function AiGameModes_Init()
@@ -63,9 +62,6 @@ void function AiGameModes_SpawnDropShip( vector pos, vector rot, int team, int c
 		//guy.EnableNPCFlag( NPC_ALLOW_PATROL | NPC_ALLOW_INVESTIGATE | NPC_ALLOW_HAND_SIGNALS | NPC_ALLOW_FLEE )
 	}
 
-	if( guys.len() >= 2 )
-		GiveNPCBattery( guys[ RandomInt( guys.len() - 1 ) + 1 ] )
-
 	if ( squadHandler != null )
 		thread squadHandler( guys )
 }
@@ -98,10 +94,15 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 		{
 			SetUpSpecialistGrunt( npc )
 		}
+		if( content == "npc_spectre" && GetCurrentPlaylistVarInt( "enable_spectre_hacking", 0 ) == 1 )
+		{
+			EnableLeeching( npc )
+			npc.SetUsableByGroup( "enemies pilot" )
+		}
 	}
 
-	if( content == "npc_soldier" && guys.len() >= 2 )
-		GiveNPCBattery( guys[ RandomInt( guys.len() - 1 ) + 1 ] )
+	if( content == "npc_spectre" )
+		GiveNPCBattery( guys[ RandomInt( guys.len() ) ] )
 
 	ActivateFireteamDropPod( pod, guys )
 
@@ -121,27 +122,27 @@ void function GiveNPCBattery( entity npc )
 	Battery_StartFX( battery )
 	battery.SetParent( npc, "BATTERY_ATTACH" )
 	battery.MarkAsNonMovingAttachment()
-	battery.RemoveFromSpatialPartition()
-	file.npcBatteryTable[ npc ] <- battery
-
-	AddEntityCallback_OnFinalDamaged( npc, DropNpcBattery )
+	thread SpectreBatteryThink( npc, battery )
 }
 
-void function DropNpcBattery( entity npc, var damageInfo )
+void function SpectreBatteryThink( entity npc, entity battery )
 {
-	if( !( npc in file.npcBatteryTable ) )
-		return
+	battery.EndSignal( "OnDestroy" )
+	npc.EndSignal( "OnDestroy" )
 
-	entity battery = file.npcBatteryTable[ npc ]
-	if( !IsValid( battery ) )
-		return
+	OnThreadEnd(
+	function() : ( battery )
+		{
+			if ( IsValid( battery ) )
+			{
+				battery.ClearParent()
+				battery.SetAngles( < 0,0,0 > )
+				battery.SetVelocity( < 0,0,200 > )
+			}
+		}
+	)
 
-	battery.Show()
-	battery.ClearParent()
-	battery.AddToSpatialPartition()
-	battery.SetAngles( <0, 0, 0 > )
-	battery.SetVelocity( < 0, 0, 1 > )
-	PutEntityInSafeSpot( battery, npc, null, npc.GetOrigin(), battery.GetOrigin() )
+	npc.WaitSignal( "OnDeath" )
 }
 
 void function SetUpSpecialistGrunt( entity npc )

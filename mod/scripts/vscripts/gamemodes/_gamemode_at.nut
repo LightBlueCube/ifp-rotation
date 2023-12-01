@@ -145,7 +145,7 @@ void function OnLastMinute()
 	int teamScore = GameRules_GetTeamScore( team )
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam )
 
-	int teamScoreAddition = abs( otherTeamScore - teamScore ) / 200 + 2
+	int teamScoreAddition = abs( otherTeamScore - teamScore ) / 400 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -153,6 +153,60 @@ void function OnLastMinute()
 			continue
 		NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍金額獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
+
+	// banking phase
+	SetGlobalNetBool( "preBankPhase", false )
+	SetGlobalNetTime( "AT_bankStartTime", Time() )
+	SetGlobalNetTime( "AT_bankEndTime", GetServerVar( "gameEndTime" ) + 0.2 )
+	SetGlobalNetBool( "banksOpen", true )
+
+	foreach ( entity player in GetPlayerArray() )
+		Remote_CallFunction_NonReplay( player, "ServerCallback_AT_BankOpen" )
+
+	foreach ( entity bank in file.banks )
+		thread AT_LastMin_BankActiveThink( bank )
+}
+
+void function AT_LastMin_BankActiveThink( entity bank )
+{
+	bank.EndSignal( "OnDestroy" )
+
+	// Banks closed
+	OnThreadEnd
+	(
+		function(): ( bank )
+		{
+			if ( IsValid( bank ) )
+			{
+				// Update use prompt
+				if ( GetGameState() != eGameState.Playing )
+					bank.UnsetUsable()
+				else
+					bank.SetUsePrompts( "#AT_USE_BANK_CLOSED", "#AT_USE_BANK_CLOSED" )
+
+				thread PlayAnim( bank, "mh_active_2_inactive" )
+				FadeOutSoundOnEntity( bank, "Mobile_Hardpoint_Idle", 0.5 )
+				bank.Minimap_Hide( TEAM_IMC, null )
+				bank.Minimap_Hide( TEAM_MILITIA, null )
+			}
+		}
+	)
+
+	// Update use prompt to usable
+	bank.SetUsable()
+	bank.SetUsePrompts( "#AT_USE_BANK", "#AT_USE_BANK_PC" )
+
+	thread PlayAnim( bank, "mh_inactive_2_active" )
+	EmitSoundOnEntity( bank, "Mobile_Hardpoint_Idle" )
+
+	// Show minimap icon for bank
+	bank.Minimap_AlwaysShow( TEAM_IMC, null )
+	bank.Minimap_AlwaysShow( TEAM_MILITIA, null )
+	bank.Minimap_SetCustomState( eMinimapObject_prop_script.AT_BANK )
+
+	// Wait for bank close or game end
+	while ( GetGlobalNetBool( "banksOpen" ) )
+		WaitFrame()
 }
 
 void function RateSpawnpoints_AT( int checkclass, array<entity> spawnpoints, int team, entity player )

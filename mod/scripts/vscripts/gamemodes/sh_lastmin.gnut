@@ -82,7 +82,7 @@ void function LastMinThreaded()
 	wait 60
 }
 
-int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 )
+int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 , float additionMin = 0.5 )
 {
 	float floatScore = float( score * teamScoreAddition )
 
@@ -104,8 +104,8 @@ int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200
 
 	addition = 1 / addition
 
-	if( addition < 0.5 )
-		addition = 0.5
+	if( addition < additionMin )
+		addition = additionMin
 	return round( floatScore * addition )
 }
 

@@ -31,15 +31,16 @@ void function GamemodeTTDM_Init()
 
 void function OnPlayerRespawned( entity player )
 {
-	thread DeployAndEnableWeapons_AfterFrame( player )
+	thread OnPlayerRespawned_Threaded( player )
 }
 
-void function DeployAndEnableWeapons_AfterFrame( entity player )
+void function OnPlayerRespawned_Threaded( entity player )
 {
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
 	WaitFrame()
-	if( IsValid( player ) )
-		if( IsAlive( player ) )
-			DeployAndEnableWeapons( player )
+	CreateBubbleShield( player, player.GetOrigin(), player.GetAngles() )
+	DeployAndEnableWeapons( player )
 }
 
 void function OnLastMinute()

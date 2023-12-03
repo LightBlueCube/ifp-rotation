@@ -47,6 +47,7 @@ void function OnPlaying()
 void function LastMinThreaded()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
+	svGlobal.levelEnt.EndSignal( "GameStateChanged" )
 
 	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
 	OnThreadEnd(

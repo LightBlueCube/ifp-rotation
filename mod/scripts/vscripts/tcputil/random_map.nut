@@ -125,7 +125,7 @@ void function RandMap( string mode )
 table<string, table<string, int> > playlistData = {
 
 	baseData = {
-		max_players = 12
+		max_players = 14
 		titan_shield_regen = 1
 		respawn_delay = 0
 		enable_spectre_hacking = 1

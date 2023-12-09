@@ -166,7 +166,6 @@ void function GamemodeFW_Init()
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
 
 	AddCallback_OnLastMinute( OnLastMinute )
-	SetBetterRespawnPointEnable( false )
 
 	// tempfix specifics
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
@@ -1605,7 +1604,7 @@ void function InitDefaultTurretDamageCallbacks()
 	FW_Turret_AddFinalDamageCallback( TurretDamageModifier )
 }
 
-const float TURRET_NUKE_DAMAGE_FRAC = 0.0 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
+const float TURRET_NUKE_DAMAGE_FRAC = 0.33 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
 const float TURRET_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float TURRET_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 
@@ -1911,6 +1910,7 @@ void function FW_SetupHarvesterForTeam( entity harvester, int team )
 	harvester.Minimap_SetCustomState( eMinimapObject_prop_script.FD_HARVESTER )
 	// damage settings
 	harvester.SetArmorType( ARMOR_TYPE_HEAVY ) // it will take heavy armor damages
+	SetObjectCanBeMeleed( harvester, true )
 	AddEntityCallback_OnFinalDamaged( harvester, OnHarvesterFinalDamaged )
 	AddEntityCallback_OnPostDamaged( harvester, OnHarvesterPostDamaged )
 
@@ -2147,8 +2147,8 @@ void function InitDefaultHarvesterDamageCallbacks() // default damage modifier f
 }
 
 // damage balancing
-const float HAVESTER_CORE_DAMAGE_FRAC = 0.67 // for core abilities that can deal large amount of damage to a non-moving target(laser core, flight core and salvo core etc.)
-const float HAVESTER_NUKE_DAMAGE_FRAC = 0.0 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
+const float HAVESTER_CORE_DAMAGE_FRAC = 0.5 // for core abilities that can deal large amount of damage to a non-moving target(laser core, flight core and salvo core etc.)
+const float HAVESTER_NUKE_DAMAGE_FRAC = 0.1 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
 const float HAVESTER_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float HARVESTER_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 

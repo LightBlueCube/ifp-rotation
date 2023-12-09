@@ -48,7 +48,7 @@ void function RandomMap_Init()
 
 void function OnClientConnected( entity player )
 {
-    thread SetPlayerToNightSky( player )
+	thread SetPlayerToNightSky( player )
 }
 
 void function GameStateEnter_Postmatch()
@@ -125,7 +125,7 @@ void function RandMap( string mode )
 table<string, table<string, int> > playlistData = {
 
 	baseData = {
-		max_players = 14
+		max_players = 12
 		titan_shield_regen = 1
 		respawn_delay = 0
 		enable_spectre_hacking = 1
@@ -161,7 +161,7 @@ table<string, table<string, int> > playlistData = {
 	ttdm = {
 		respawn_delay = 0
 		scorelimit = 2147483647
-		timelimit = 8
+		timelimit = 10
 	}
 
 }
@@ -223,10 +223,10 @@ string function GetMapTitleName( string map )
 			return "異常"
 		case "mp_homestead":
 			return "家園"
-        case "mp_wargames":
+		case "mp_wargames":
 			return "戰爭游戲"
-        case "mp_forwardbase_kodai":
-            return "虎大前進基地"
+		case "mp_forwardbase_kodai":
+			return "虎大前進基地"
 		case "mp_complex3":
 			return "綜合設施"
 		case "mp_rise":
@@ -264,23 +264,23 @@ array<string> function GetRandomArrayElem( array<string> a )
 
 array<string> function GetStringArrayFromConVar( string convar )
 {
-    return split( GetConVarString( convar ), "," )
+	return split( GetConVarString( convar ), "," )
 }
 
 // 用于更新整个ConVar数组
 string function StoreStringArrayIntoConVar( string convar, array<string> arrayToStore )
 {
-    string builtString = ""
-    foreach ( string item in arrayToStore )
-    {
-        if ( builtString == "" ) // 第一个元素，不添加逗号
-            builtString = item
-        else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
-            builtString += "," + item
-    }
+	string builtString = ""
+	foreach ( string item in arrayToStore )
+	{
+		if ( builtString == "" ) // 第一个元素，不添加逗号
+			builtString = item
+		else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
+			builtString += "," + item
+	}
 
-    // 更新ConVar
-    SetConVarString( convar, builtString )
-    // 返回构造好的字符串
-    return builtString
+	// 更新ConVar
+	SetConVarString( convar, builtString )
+	// 返回构造好的字符串
+	return builtString
 }

@@ -8,11 +8,11 @@ global function SHCreateGamemodeFW_Init
 // object settings, changable through playlist vars
 // default havester settings
 global const int FW_DEFAULT_HARVESTER_HEALTH = 80000
-global const int FW_DEFAULT_HARVESTER_SHIELD = 10000
+global const int FW_DEFAULT_HARVESTER_SHIELD = 20000
 global const float FW_DEFAULT_HARVESTER_REGEN_DELAY = 12.0
 global const float FW_DEFAULT_HARVESTER_REGEN_TIME = 10.0
 // default turret settings
-global const int FW_DEFAULT_TURRET_HEALTH = 10000
+global const int FW_DEFAULT_TURRET_HEALTH = 20000
 global const int FW_DEFAULT_TURRET_SHIELD = 2500
 
 // fix a turret

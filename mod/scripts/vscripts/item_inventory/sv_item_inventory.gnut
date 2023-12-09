@@ -16,7 +16,7 @@ global function PlayerInventory_GetItemStructByBurnRef
 global function PlayerInventory_GetInventoryItems
 global function PlayerInventory_ReplaceInventoryItemByBurnRef
 global function PlayerInventory_ReplaceAllInventoryItemTypeByBurnRef
-global function PlayerInventory_GetPlayerInventoryStack
+global function PlayerInventory_AddInventoryItemIntoPlayerInventoryStack
 
 struct
 {
@@ -255,7 +255,7 @@ void function PlayerInventory_ReplaceAllInventoryItemTypeByBurnRef( entity playe
 	PlayerInventory_UpdateActiveInventoryItem( player )
 }
 
-array<InventoryItem> function PlayerInventory_GetPlayerInventoryStack( entity player )
+void function PlayerInventory_AddInventoryItemIntoPlayerInventoryStack( entity player, InventoryItem inventoryItem )
 {
-	return file.playerInventoryStacks[ player ]
+	file.playerInventoryStacks[ player ].append( inventoryItem )
 }

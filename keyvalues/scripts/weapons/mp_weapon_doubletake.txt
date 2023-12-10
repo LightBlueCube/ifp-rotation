@@ -8,5 +8,9 @@ WeaponData
 		"npc_max_burst"									"1"
 		"npc_rest_time_between_bursts_min"				"2.0"
 		"npc_rest_time_between_bursts_max"				"4.0"
+
+		// Damage - When Used by NPCs
+		"npc_damage_near_value_titanarmor"   						"30"
+		"npc_damage_far_value_titanarmor"							"30"
 	}
 }

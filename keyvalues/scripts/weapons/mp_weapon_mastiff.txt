@@ -6,7 +6,10 @@ WeaponData
 		"npc_accuracy_multiplier_pilot"					"100.0"
 		"npc_min_burst"									"1"
 		"npc_max_burst"									"1"
-		"npc_rest_time_between_bursts_min"				"0.77"
-		"npc_rest_time_between_bursts_max"				"0.77"
+		"npc_rest_time_between_bursts_min"				"2.0"
+		"npc_rest_time_between_bursts_max"				"4.5"
+		// Damage - When Used by NPCs
+		"npc_damage_near_value_titanarmor"   						"20"
+		"npc_damage_far_value_titanarmor"							"12"
 	}
 }

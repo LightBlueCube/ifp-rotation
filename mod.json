@@ -16,10 +16,6 @@
     ],
     "ConVars": [
         {
-            "Name": "random_map_playlist",
-            "DefaultValue": ""
-        },
-        {
             "Name": "random_mode_playlist",
             "DefaultValue": ""
         }

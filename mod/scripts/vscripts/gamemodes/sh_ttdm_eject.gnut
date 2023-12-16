@@ -1,14 +1,16 @@
 global function TTDMEject
 global function SetTTDMEject
 
-bool ttdmEject = false
+struct{
+	bool ttdmEject = false
+}file
 
 bool function TTDMEject()
 {
-    return ttdmEject
+    return file.ttdmEject
 }
 
-void function SetTTDMEject( bool b )
+void function SetTTDMEject( bool input )
 {
-    ttdmEject = b
+    file.ttdmEject = input
 }

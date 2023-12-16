@@ -778,8 +778,9 @@ function TitanEjectPlayer( entity ejectTitan, bool instant = false ) //TODO: Thi
 	}
 }
 
-void function KillPlayerOnGround( var player )
+void function KillPlayerOnGround( var ent )
 {
+	entity player = expect entity( ent )
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
 	for( ;; )
@@ -790,8 +791,7 @@ void function KillPlayerOnGround( var player )
 		if( player.IsHuman() && IsValid( player.GetParent() ) )
 			break
 	}
-	DeployAndEnableWeapons( expect entity( player ) )
-	WaitFrame()
+	DeployAndEnableWeapons( player )
 	player.Die( null, null, { damageSourceId = eDamageSourceId.fall } )
 }
 

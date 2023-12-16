@@ -1,5 +1,6 @@
 global function RandomMap_Init
 global function RandomGameMode
+global function ShowCustomTextOnPostmatch
 
 const array<string> MAPS_ALL = [
 	"mp_black_water_canal",
@@ -29,92 +30,95 @@ const array<string> MAPS_FW = [
 
 const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "ctf", "fw", "ttdm" ]
 
-array<string> MAP_PLAYLIST = []
-array<string> MODE_PLAYLIST = []
+struct{
+	array<string> mapPlaylist = []
+	array<string> modePlaylist = []
+	string customText = ""
+}file
 
 void function RandomMap_Init()
 {
-	MAP_PLAYLIST = GetStringArrayFromConVar( "random_map_playlist" )
-	MODE_PLAYLIST = GetStringArrayFromConVar( "random_mode_playlist" )
-	if( MAP_PLAYLIST.len() == 0 && MODE_PLAYLIST.len() == 0 )
+	file.mapPlaylist = GetStringArrayFromConVar( "random_map_playlist" )
+	file.modePlaylist = GetStringArrayFromConVar( "random_mode_playlist" )
+	if( file.mapPlaylist.len() == 0 && file.modePlaylist.len() == 0 )
 	{
 		thread RandomGameMode()
 		return
 	}
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
-	if( RandomInt( 3 ) == 0 )
-		AddCallback_OnClientConnected( OnClientConnected )
 }
 
-void function OnClientConnected( entity player )
+void function ShowCustomTextOnPostmatch( string text )
 {
-	thread SetPlayerToNightSky( player )
+	file.customText = text
 }
 
 void function GameStateEnter_Postmatch()
 {
 	thread RandomGameMode()
 }
+
 void function RandomGameMode()
 {
-	if( MODE_PLAYLIST.len() == 0 )
+	if( file.modePlaylist.len() == 0 )
 	{
-		MODE_PLAYLIST = GetRandomArrayElem( GAMEMODES_ALL )
-		return RandMap( MODE_PLAYLIST[0] )
+		file.modePlaylist = RandomArrayElem( GAMEMODES_ALL )
+		return RandomMap( file.modePlaylist[0] )
 	}
 
 	int i = 0
-	foreach( mode in MODE_PLAYLIST )
+	foreach( mode in file.modePlaylist )
 	{
 		if( GameRules_GetGameMode() == mode )
 			break
 		i++
 	}
 
-	if( MODE_PLAYLIST.len() - 1 == i )
+	if( file.modePlaylist.len() - 1 == i )
 	{
-		MODE_PLAYLIST = GetRandomArrayElem( GAMEMODES_ALL )
+		file.modePlaylist = RandomArrayElem( GAMEMODES_ALL )
 		i = 0
 	}
 	else
 		i++
-	RandMap( MODE_PLAYLIST[i] )
+	RandomMap( file.modePlaylist[i] )
 }
 
-void function RandMap( string mode )
+void function RandomMap( string mode )
 {
 	int i = 0
-	foreach( map in MAP_PLAYLIST )
+	foreach( map in file.mapPlaylist )
 	{
 		if( GetMapName() == map )
 			break
 		i++
 	}
 
-
-	if( MAP_PLAYLIST.len() - 1 == i || MAP_PLAYLIST.len() == 0 )
+	if( file.mapPlaylist.len() - 1 == i || file.mapPlaylist.len() == 0 )
 	{
-		MAP_PLAYLIST = GetRandomArrayElem( MAPS_ALL )
+		file.mapPlaylist = RandomArrayElem( MAPS_ALL )
 		i = 0
 	}
 	else
 		i++
 
-	if( mode == "fw" && !MAPS_FW.contains( MAP_PLAYLIST[i] ) )
+	if( mode == "fw" && !MAPS_FW.contains( file.mapPlaylist[i] ) )
 	{
-		string save = MAP_PLAYLIST[i]
 		int num = FindNearlyValidFWMap( i )
-		MAP_PLAYLIST[i] = MAP_PLAYLIST[num]
-		MAP_PLAYLIST[num] = save
+		if( num < i )
+			i--
+		string save = file.mapPlaylist[i]
+		file.mapPlaylist[i] = file.mapPlaylist[num]
+		file.mapPlaylist[num] = save
 	}
 
-	string map = MAP_PLAYLIST[i]
-	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
+	string map = file.mapPlaylist[i]
+	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
 
 	wait GAME_POSTMATCH_LENGTH - 0.1
 
-	StoreStringArrayIntoConVar( "random_map_playlist", MAP_PLAYLIST )
-	StoreStringArrayIntoConVar( "random_mode_playlist", MODE_PLAYLIST )
+	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
+	StoreStringArrayIntoConVar( file.modePlaylist, "random_mode_playlist" )
 	RandomGamemode_SetPlaylistVarOverride( mode )
 	GameRules_ChangeMap( map, mode )
 }
@@ -122,7 +126,7 @@ void function RandMap( string mode )
 
 // WARNING!!!! Respawn doesnt give way to clear the playlist overrides without map is mp_lobby
 // so if u added a new playlistvar overrides, then u also need add this playlistvar's default value in "baseData" or other gamemodes data
-table<string, table<string, int> > playlistData = {
+const table<string, table<string, int> > PLAYLIST_OVERRIDES = {
 
 	baseData = {
 		max_players = 10
@@ -163,19 +167,18 @@ table<string, table<string, int> > playlistData = {
 		scorelimit = 2147483647
 		timelimit = 10
 	}
-
 }
 
 void function RandomGamemode_SetPlaylistVarOverride( string mode )
 {
-	if( !( mode in playlistData ) )
+	if( !( mode in PLAYLIST_OVERRIDES ) )
 		unreachable	// crash the server
 
 	ServerCommand( "mp_gamemode "+ mode )
 	ServerCommand( "setplaylist "+ mode )
-	foreach( string key, int value in playlistData[ "baseData" ] )
+	foreach( string key, int value in PLAYLIST_OVERRIDES[ "baseData" ] )
 		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
-	foreach( string key, int value in playlistData[ mode ] )
+	foreach( string key, int value in PLAYLIST_OVERRIDES[ mode ] )
 		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
 }
 
@@ -240,16 +243,16 @@ string function GetMapTitleName( string map )
 int function FindNearlyValidFWMap( int start )
 {
 	int i = start
-	while( i < MAP_PLAYLIST.len() )
+	while( i < file.mapPlaylist.len() )
 	{
-		if( MAPS_FW.contains( MAP_PLAYLIST[i] ) )
+		if( MAPS_FW.contains( file.mapPlaylist[i] ) )
 			return i
 		i++
 	}
 	return FindNearlyValidFWMap( 0 )
 }
 
-array<string> function GetRandomArrayElem( array<string> a )
+array<string> function RandomArrayElem( array<string> a )
 {
 	array<string> b = a
 	array<string> c = []
@@ -260,27 +263,4 @@ array<string> function GetRandomArrayElem( array<string> a )
 		c.append( randElem )
 	}
 	return c
-}
-
-array<string> function GetStringArrayFromConVar( string convar )
-{
-	return split( GetConVarString( convar ), "," )
-}
-
-// 用于更新整个ConVar数组
-string function StoreStringArrayIntoConVar( string convar, array<string> arrayToStore )
-{
-	string builtString = ""
-	foreach ( string item in arrayToStore )
-	{
-		if ( builtString == "" ) // 第一个元素，不添加逗号
-			builtString = item
-		else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
-			builtString += "," + item
-	}
-
-	// 更新ConVar
-	SetConVarString( convar, builtString )
-	// 返回构造好的字符串
-	return builtString
 }

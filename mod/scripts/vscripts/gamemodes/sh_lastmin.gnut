@@ -4,11 +4,12 @@ global function GetTeamScoreAddition
 global function AddCallback_OnLastMinute
 global function ScoreAdditionFromTeam
 
-int teamScoreAddition = 1
+struct{
+	int teamScoreAddition = 1
+	array<void functionref()> lastMinCallbackFunc = []
+}file
 
-array<void functionref()> lastMinCallbackFunc = []
-
-array<string> lastMinMusic = [
+const array<string> LAST_MIN_MUSIC = [
 	"music_reclamation_17a_thingsgetbad",
 	"music_boomtown_22_embarkbt",
 	"music_wilds_17_titanfight",
@@ -26,17 +27,17 @@ void function LastMinute_Init()
 
 void function SetTeamScoreAddition( int i )
 {
-    teamScoreAddition = i
+    file.teamScoreAddition = i
 }
 
 int function GetTeamScoreAddition()
 {
-    return teamScoreAddition
+    return file.teamScoreAddition
 }
 
 void function AddCallback_OnLastMinute( void functionref() callbackFunc )
 {
-    lastMinCallbackFunc.append( callbackFunc )
+    file.lastMinCallbackFunc.append( callbackFunc )
 }
 
 void function OnPlaying()
@@ -49,11 +50,11 @@ void function LastMinThreaded()
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 	svGlobal.levelEnt.EndSignal( "GameStateChanged" )
 
-	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
+	string music = LAST_MIN_MUSIC[ RandomInt( LAST_MIN_MUSIC.len() ) ]
 	OnThreadEnd(
 		function():( music )
 		{
-			teamScoreAddition = 1
+			file.teamScoreAddition = 1
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
@@ -78,14 +79,14 @@ void function LastMinThreaded()
 		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 	}
-    foreach( callbackFunc in lastMinCallbackFunc )
+    foreach( callbackFunc in file.lastMinCallbackFunc )
         callbackFunc()
 	wait 60
 }
 
 int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 , float additionMin = 0.5 )
 {
-	float floatScore = float( score * teamScoreAddition )
+	float floatScore = float( score * file.teamScoreAddition )
 
 	if( team != TEAM_IMC && team != TEAM_MILITIA )
 		return int( floatScore )

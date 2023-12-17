@@ -43,6 +43,7 @@ void function CaptureTheFlag_Init()
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnPilotBecomesTitan( DropFlagForBecomingTitan )
 
+	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender" ] )

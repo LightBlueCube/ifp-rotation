@@ -165,6 +165,7 @@ void function GamemodeFW_Init()
 	SetRecalculateTitanReplacementPointCallback( FW_ReCalculateTitanReplacementPoint )
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
 
+	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )
 
 	// tempfix specifics

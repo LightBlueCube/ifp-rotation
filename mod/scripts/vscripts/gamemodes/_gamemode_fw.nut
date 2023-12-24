@@ -143,6 +143,9 @@ void function GamemodeFW_Init()
 	// _battery_port.gnut needs this
 	RegisterSignal( "BatteryActivate" )
 
+	if( GetMapName() == "mp_thaw" )	// mp_thaw's intro spawnpoint have some problem, player can stucks on the sky, so we override it
+		SetSpawnpointGamemodeOverride( TEAM_DEATHMATCH )
+
 	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender" ] )
 	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_defender", "mp_weapon_mgl" ] )
@@ -164,6 +167,7 @@ void function GamemodeFW_Init()
 	SetRecalculateRespawnAsTitanStartPointCallback( FW_ForcedTitanStartPoint )
 	SetRecalculateTitanReplacementPointCallback( FW_ReCalculateTitanReplacementPoint )
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
+	SetSvmPredictEnable( false )
 
 	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )
@@ -2054,7 +2058,7 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 	if( friendlyTeam == TEAM_IMC )
 		harvesterstruct = fw_harvesterImc
 
-	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile )
+	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core )
 	{
 		if( attacker.IsPlayer() )
 			Remote_CallFunction_NonReplay( attacker , "ServerCallback_FW_NotifyTitanRequired" )

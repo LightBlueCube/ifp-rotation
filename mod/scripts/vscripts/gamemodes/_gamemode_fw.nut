@@ -2044,7 +2044,7 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 		return
 
 	// prevent player from sniping the harvester cross-map
-	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile )
+	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core )
 	{
 		Remote_CallFunction_NonReplay( attacker, "ServerCallback_FW_NotifyNeedsEnterEnemyArea" )
 		DamageInfo_SetDamage( damageInfo, 0 )
@@ -2153,7 +2153,7 @@ void function InitDefaultHarvesterDamageCallbacks() // default damage modifier f
 
 // damage balancing
 const float HAVESTER_CORE_DAMAGE_FRAC = 0.5 // for core abilities that can deal large amount of damage to a non-moving target(laser core, flight core and salvo core etc.)
-const float HAVESTER_NUKE_DAMAGE_FRAC = 0.1 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
+const float HAVESTER_NUKE_DAMAGE_FRAC = 0.2 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
 const float HAVESTER_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float HARVESTER_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 

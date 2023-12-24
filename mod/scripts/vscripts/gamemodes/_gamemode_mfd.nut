@@ -41,6 +41,23 @@ void function GamemodeMfd_Init()
 	AddCallback_OnClientConnected( SetupMFDPlayer )
 	AddCallback_OnPlayerKilled( UpdateMarksForKill )
 	AddCallback_GameStateEnter( eGameState.Playing, CreateInitialMarks )
+
+	AddCallback_OnLastMinute( OnLastMinute )
+}
+
+void function OnLastMinute()
+{
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
+
+		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
+			continue
+
+		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )
+	}
 }
 
 void function SetupMFDPlayer( entity player )
@@ -261,7 +278,7 @@ void function UpdateMarksForKill( entity victim, entity attacker, var damageInfo
 			PlayFactionDialogueToPlayer( "mfd_youKilledMark", attacker )
 			attacker.SetPlayerGameStat( PGS_ASSAULT_SCORE, attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) + 1 )
 			attacker.s.NukeTitan += 1
-			thread SendAnnouncementMessageWaiting( attacker, "獲得核武泰坦！", 2 )
+			thread SendAnnouncementMessageWaiting( attacker, "獲得核武泰坦！", 4 )
 		}
 	}
 	else

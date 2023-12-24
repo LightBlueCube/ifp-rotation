@@ -28,7 +28,7 @@ const array<string> MAPS_FW = [
 	"mp_crashsite3",
 	"mp_complex3" ]
 
-const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "ctf", "fw", "ttdm" ]
+const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "fw", "ttdm",/* "ctf",*/ "mfd" ]
 
 struct{
 	array<string> mapPlaylist = []
@@ -126,46 +126,54 @@ void function RandomMap( string mode )
 
 // WARNING!!!! Respawn doesnt give way to clear the playlist overrides without map is mp_lobby
 // so if u added a new playlistvar overrides, then u also need add this playlistvar's default value in "baseData" or other gamemodes data
-const table<string, table<string, int> > PLAYLIST_OVERRIDES = {
+const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	baseData = {
-		max_players = 10
-		titan_shield_regen = 1
-		respawn_delay = 0
-		enable_spectre_hacking = 1
+		max_players = "10"
+		titan_shield_regen = "1"
+		earn_meter_pilot_multiplier = "1"
+		respawn_delay = "0"
+		enable_spectre_hacking = "1"
 	}
 
 	aitdm = {
-		scorelimit = 2147483647
-		timelimit = 16
+		scorelimit = "2147483647"
+		timelimit = "16"
 	}
 
 	at = {
-		enable_spectre_hacking = 0
-		scorelimit = 2147483647
-		timelimit = 16
+		enable_spectre_hacking = "0"
+		scorelimit = "8000"
+		timelimit = "16"
 	}
 
 	cp = {
-		scorelimit = 2147483647
-		timelimit = 12
-	}
-
-	ctf = {
-		respawn_delay = 0
-		scorelimit = 5
-		timelimit = 10
+		scorelimit = "2147483647"
+		timelimit = "12"
 	}
 
 	fw = {
-		scorelimit = 100
-		timelimit = 16
+		scorelimit = "100"
+		timelimit = "16"
 	}
 
 	ttdm = {
-		respawn_delay = 0
-		scorelimit = 2147483647
-		timelimit = 10
+		respawn_delay = "0"
+		scorelimit = "2147483647"
+		timelimit = "10"
+	}
+
+	ctf = {
+		earn_meter_pilot_multiplier = "2"
+		respawn_delay = "0"
+		scorelimit = "5"
+		timelimit = "10"
+	}
+
+	mfd = {
+		earn_meter_pilot_multiplier = "2"
+		scorelimit = "16"
+		timelimit = "12"
 	}
 }
 
@@ -192,12 +200,14 @@ string function GetModeName( string mode )
 			return "賞金追緝"
 		case "cp":
 			return "強化據點"
-		case "ctf":
-			return "奪旗"
 		case "fw":
 			return "邊境戰爭"
 		case "ttdm":
 			return "泰坦爭鬥"
+		case "ctf":
+			return "奪旗"
+		case "mfd":
+			return "獵殺標記"
 	}
 	return "UNKNOWN"
 }

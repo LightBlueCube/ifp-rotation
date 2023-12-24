@@ -184,9 +184,9 @@ void function RandomGamemode_SetPlaylistVarOverride( string mode )
 
 	ServerCommand( "mp_gamemode "+ mode )
 	ServerCommand( "setplaylist "+ mode )
-	foreach( string key, int value in PLAYLIST_OVERRIDES[ "baseData" ] )
+	foreach( string key, string value in PLAYLIST_OVERRIDES[ "baseData" ] )
 		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
-	foreach( string key, int value in PLAYLIST_OVERRIDES[ mode ] )
+	foreach( string key, string value in PLAYLIST_OVERRIDES[ mode ] )
 		ServerCommand( "setplaylistvaroverrides \""+ key +"\" "+ value )
 }
 

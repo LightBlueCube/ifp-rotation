@@ -167,7 +167,6 @@ void function GamemodeFW_Init()
 	SetRecalculateRespawnAsTitanStartPointCallback( FW_ForcedTitanStartPoint )
 	SetRecalculateTitanReplacementPointCallback( FW_ReCalculateTitanReplacementPoint )
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
-	SetSvmPredictEnable( false )
 
 	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )

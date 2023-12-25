@@ -54,7 +54,6 @@ void function CaptureTheFlag_Init()
 
 	SetSpawnZoneRatingFunc( DecideSpawnZone_CTF )
 	AddSpawnpointValidationRule( VerifyCTFSpawnpoint )
-	SetSvmPredictEnable( false )
 
 	RegisterSignal( "FlagReturnEnded" )
 	RegisterSignal( "ResetDropTimeout" )

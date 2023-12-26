@@ -45,7 +45,7 @@ void function OnPlayerRespawned_Threaded( entity player )
 
 void function OnLastMinute()
 {
-	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 20 + 2
+	int teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 25 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{
@@ -168,7 +168,7 @@ void function AddTeamScoreForPlayerKilled( entity victim, entity attacker, var d
 	if( victim.IsTitan() )
 		score = 10
 
-	AddTeamScore( team, ScoreAdditionFromTeam( team, score, 60 ) )
+	AddTeamScore( team, ScoreAdditionFromTeam( team, score, 50 ) )
 }
 
 int function CheckScoreForDraw()

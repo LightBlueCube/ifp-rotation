@@ -2199,8 +2199,6 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		DamageInfo_ScaleDamage( damageInfo, file.harvesterDamageSourceMods[ damageSourceID ] )
 
 	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10, 0.0 ) ) / 100.0
-	if( balanceFrac == 0 || harvester.GetShieldHealth() != 0 )
-		return
 	if( balanceFrac < 0.25 )
 		balanceFrac = 0.25
 	if( balanceFrac > 4.0 )

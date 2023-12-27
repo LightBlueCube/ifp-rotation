@@ -53,10 +53,11 @@ void function OnLastMinute()
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
 
-		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
-			continue
-
-		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )
+		foreach( player in GetPlayerArray() )
+		{
+			Highlight_ClearEnemyHighlight( player )
+			Highlight_SetSonarHighlightWithParam0( player, "enemy_sonar", <1, 0, 0> )
+		}
 	}
 }
 

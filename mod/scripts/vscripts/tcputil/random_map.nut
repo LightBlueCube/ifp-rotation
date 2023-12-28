@@ -143,7 +143,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	at = {
 		enable_spectre_hacking = "0"
-		scorelimit = "8000"
+		scorelimit = "10000"
 		timelimit = "16"
 	}
 

@@ -1,5 +1,5 @@
 {
-    "Name": "GamemodePack",
+    "Name": "ifp-rotation-package",
     "LoadPriority": 102,
     "Scripts": [
         {

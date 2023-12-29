@@ -8,14 +8,11 @@ global function IsEvacDropship
 global function EvacEpilogueSetup
 global function Evac
 
-global function EpilogueCompletionFuncStarted // once this is triggered, evac func won't run compeletion callback
-global function GenericEpilogueCompleted // to stop exsiting evac think
-
 const float EVAC_INITIAL_WAIT = 5.0
 const float EVAC_ARRIVAL_TIME = 40.0
 const float EVAC_WAIT_TIME = 18.0
 
-const int EVAC_SHIP_HEALTH = 40000
+const int EVAC_SHIP_HEALTH = 50000
 const int EVAC_SHIP_SHIELDS = 10000
 
 // we don't use these because they're busted, just keeping them
@@ -71,11 +68,6 @@ struct {
 	entity currentEvacNode
 	entity evacDropship
 	entity evacIcon
-
-	// we only run 1 completion callback
-	int evacTeam = -1
-	bool epilogueCompletionFuncRunning = false
-	bool evacFlyAway = false
 } file
 
 struct EvacShipSetting
@@ -86,13 +78,13 @@ struct EvacShipSetting
 	string flyoutSound
 }
 
+bool EvacFlyAway = false
+
 void function Evac_Init()
 {
 	EvacShared_Init()
 	RegisterSignal( "EvacShipLeaves" )
 	RegisterSignal( "EvacOver" )
-	// for ending the evac think
-	RegisterSignal( "EpilogueCompleted" )
 
 	PrecacheParticleSystem( FX_EVAC_MARKER )
 }
@@ -138,34 +130,14 @@ void function EvacEpilogue()
 		//thread SetRespawnAndWait( false )
 
 		// no players can evac? end match
-		//thread CheckIfAnyPlayerLeft( GetOtherTeam( winner ) )
+		thread CheckIfAnyPlayerLeft( GetOtherTeam( winner ) )
 
 		thread Evac( GetOtherTeam( winner ), EVAC_INITIAL_WAIT, EVAC_ARRIVAL_TIME, EVAC_WAIT_TIME, EvacEpiloguePlayerCanBoard, EvacEpilogueShouldLeaveEarly, EvacEpilogueCompleted )
-		AddCallback_OnPlayerKilled( EvacOnPlayerKilled ) // score
 	}
 	else
 	{
 		//thread SetRespawnAndWait( false ) //prevent respawns during the fade to black, should only be an issue if the match is a draw
 		thread EvacEpilogueCompleted( null ) //this is hacky but like, this also shouldn't really be hit in normal gameplay
-	}
-}
-
-// score
-void function EvacOnPlayerKilled( entity victim, entity attacker, var damageInfo )
-{
-	if ( GetGameState() == eGameState.Epilogue && !RespawnsEnabled() )
-	{
-		if ( victim.GetTeam() == file.evacTeam )
-		{
-			if ( IsValid( attacker ) && victim != attacker && attacker.IsPlayer() )
-				AddPlayerScore( attacker, "KilledEscapee", victim )
-		}
-
-		if ( GetPlayerArrayOfTeam_Alive( victim.GetTeam() ).len() == 0 ) // last player! idk whether we should check 1 left
-		{
-			foreach ( entity player in GetPlayerArrayOfTeam( GetOtherTeam( victim.GetTeam() ) ) )
-				AddPlayerScore( player, "TeamBonusKilledAll" )
-		}
 	}
 }
 
@@ -178,11 +150,6 @@ void function EvacSpectatorFunc( entity player )
 	if ( !IsValid( cam ) )
 		return
 
-	player.StopObserverMode()
-	if ( player.IsWatchingSpecReplay() )
-		player.SetSpecReplayDelay( 0.0 ) // clear spectator replay
-
-	player.SetObserverTarget( null ) // clean up callsign display
 	player.SetObserverModeStaticPosition( cam.GetOrigin() )
 	player.SetObserverModeStaticAngles( cam.GetAngles() )
 	player.StartObserverMode( OBS_MODE_STATIC )
@@ -190,23 +157,14 @@ void function EvacSpectatorFunc( entity player )
 	file.evacDropship.WaitSignal( "EvacOver" )
 }
 
-// modified callback in _spectator.gnut
-bool function EvacSpectatorValidationRule( entity spectator, entity specTarget )
-{
-	if ( IsValid( file.evacDropship ) )
-	{
-		// transfer spec target on player embarks
-		if ( specTarget.IsPlayer() && PlayerInDropship( specTarget, file.evacDropship ) )
-			return false
-	}
-
-	return true
-}
-
 void function SetRespawnAndWait( bool mode )
 {
 	wait GAME_EPILOGUE_PLAYER_RESPAWN_LEEWAY
 	SetRespawnsEnabled( mode )
+
+	// clear any respawn availablity, or players are able to save there respawn for whenever they want
+	foreach( entity player in GetPlayerArray() )
+		ClearRespawnAvailable( player )
 }
 
 bool function EvacEpiloguePlayerCanBoard( entity dropship, entity player )
@@ -231,55 +189,31 @@ bool function EvacEpilogueShouldLeaveEarly( entity dropship )
 		if ( IsValid( player ) )
 			numEvacing++
 
-	return GetPlayerArrayOfTeam( dropship.GetTeam() ).len() == numEvacing || numEvacing == dropship.s.evacSlots.len()
+	return GetPlayerArrayOfTeam_Alive( dropship.GetTeam() ).len() == numEvacing || numEvacing == dropship.s.evacSlots.len()
 }
 
 void function EvacEpilogueCompleted( entity dropship )
 {
-	// debug
-	//print( "RUNNING EvacEpilogueCompleted()" )
-	EpilogueCompletionFuncStarted()
-	wait ROUND_WINNING_KILL_REPLAY_LENGTH_OF_REPLAY // TEMP
+	wait 5.0
 
-	thread EvacEpilogueCompleted_Threaded()
-	// there ain't so many waits in vanilla
-	// screen fade and cleanup handled in postmatch
+	foreach ( entity player in GetPlayerArray() )
+		ScreenFadeToBlackForever( player, 2.0 )
+
+	wait 2.0
 	if( GetGameState() != eGameState.Postmatch )
 		SetGameState( eGameState.Postmatch )
-}
-
-void function EvacEpilogueCompleted_Threaded()
-{
-	wait 1.0 // wait for player screen fade
-	GenericEpilogueCompleted() // stop existing evac think
-}
-
-void function EpilogueCompletionFuncStarted()
-{
-	// once this is triggered, evac func won't run compeletion callback
-	file.epilogueCompletionFuncRunning = true
-}
-
-void function GenericEpilogueCompleted()
-{
-	// stop existing evac think
-	svGlobal.levelEnt.Signal( "EpilogueCompleted" )
-	// clean up stuffs
-	if ( IsValid( file.evacIcon ) )
-		file.evacIcon.Destroy()
 }
 
 // global evac func, anything can call this, it's not necessarily an epilogue thing
 void function Evac( int evacTeam, float initialWait, float arrivalTime, float waitTime, bool functionref( entity, entity ) canBoardCallback, bool functionref( entity ) shouldLeaveEarlyCallback, void functionref( entity ) completionCallback, entity customEvacNode = null )
 {
-	// end evac thread if there triggered
-	svGlobal.levelEnt.EndSignal( "EpilogueCompleted" )
-
 	// get evac ship sound and model for specific team
 	EvacShipSetting evacShip = GetEvacShipSettingByTeam( evacTeam )
-	file.evacTeam = evacTeam
 
 	wait initialWait
+
+	foreach( player in GetPlayerArray() )
+		NSSendAnnouncementMessageToPlayer( player, "成功撤離將在下局獲得隨即連殺獎勵", "", < 50, 50, 225 >, 255, 5 )
 
 	// setup evac nodes if not manually registered
 	if ( file.evacNodes.len() == 0 && !IsValid( customEvacNode ) )
@@ -311,6 +245,14 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	DispatchSpawn( file.evacIcon )
 	file.evacIcon.DisableHibernation()
 
+	// start evac beam
+	int index = GetParticleSystemIndex( FX_EVAC_MARKER )
+
+	entity effectFriendly = StartParticleEffectInWorld_ReturnEntity( index, evacNode.GetOrigin(), < 0,0,0 > )
+	SetTeam( effectFriendly, evacTeam )
+	effectFriendly.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+	effectFriendly.DisableHibernation() // prevent it from fading out
+
 	wait 0.5 // need to wait here, or the target won't appear on clients for some reason
 	// eta until arrive
 	SetTeamActiveObjective( evacTeam, "EG_DropshipExtract", Time() + arrivalTime, file.evacIcon )
@@ -320,14 +262,12 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	wait arrivalTime - 4.33333
 
 	entity dropship = CreateDropship( evacTeam, evacNode.GetOrigin(), evacNode.GetAngles() )
-	SetSpawnOption_AISettings( dropship, "npc_dropship_hero" ) // proper aisettings since it will show shield bars
 
 	thread DropShipTempHide( dropship ) // prevent showing model and health bar on spawn
 	dropship.SetValueForModelKey( evacShip.shipModel )
 
 	dropship.SetMaxHealth( EVAC_SHIP_HEALTH )
 	dropship.SetHealth( EVAC_SHIP_HEALTH )
-	dropship.SetShieldHealthMax( EVAC_SHIP_SHIELDS )
 	dropship.SetShieldHealth( EVAC_SHIP_SHIELDS )
 	SetTargetName( dropship, "#NPC_EVAC_DROPSHIP" )
 	DispatchSpawn( dropship )
@@ -343,17 +283,14 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	dropship.s.evacSlots <- [ null, null, null, null, null, null, null, null ]
 	file.evacDropship = dropship
 
-	// signals setup
 	dropship.EndSignal( "OnDestroy" )
-	dropship.EndSignal( "OnDeath" )
-
 	OnThreadEnd( function() : ( evacTeam, completionCallback, dropship )
 	{
 		if ( "evacTrigger" in dropship.s )
 			dropship.s.evacTrigger.Destroy()
 
 		// this should be for both teams
-		if( !IsAlive( dropship ) )
+		if( !IsValid( dropship ) )
 		{
 			SetTeamActiveObjective( evacTeam, "EG_DropshipExtractDropshipDestroyed" )
 			SetTeamActiveObjective( GetOtherTeam( evacTeam ), "EG_DropshipExtractDropshipDestroyed" )
@@ -368,16 +305,11 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 		}
 
 		// this is called whether dropship is destroyed or evac finishes, callback can handle this itself
-		// only gets called if completion callback isn't called in other functions
-		// players elimination think is handled by CheckIfAnyPlayerLeft()
-		if ( !file.epilogueCompletionFuncRunning )
-			thread completionCallback( dropship )
+		thread completionCallback( dropship )
 	})
 
 	// flyin
 	Spectator_SetCustomSpectatorFunc( EvacSpectatorFunc )
-	// modified callback in _spectator.gnut
-	Spectator_AddSpecTargetValidationRule( EvacSpectatorValidationRule )
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_start", evacNode )
 
 	// fly in sound and effect
@@ -397,7 +329,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 			continue
 		if( player.GetTeam() != evacTeam )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離有獎勵！", < 50, 50, 225 >, 255, 5 )
+		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "", < 50, 50, 225 >, 255, 5 )
 	}
 
 	// hover sound
@@ -411,13 +343,17 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	PlayFactionDialogueToTeam( "mp_evacGo", evacTeam )
 	PlayFactionDialogueToTeam( "mp_evacStop", GetOtherTeam( evacTeam ) )
 
+	// stop evac beam
+	if( IsValid( effectFriendly ) )
+		EffectStop( effectFriendly )
+
 	// setup evac trigger
 	entity trigger = CreateEntity( "trigger_cylinder" )
 	trigger.SetRadius( 200 ) // was 150, vanilla's is surly bigger
 	trigger.SetAboveHeight( 100 )
 	trigger.SetBelowHeight( 100 )
 	trigger.SetOrigin( dropship.GetOrigin() )
-	trigger.SetParent( dropship, "RESCUE" ) // RESCURE should be the attachment vanilla uses?
+	trigger.SetParent( dropship, "ORIGIN" )
 	DispatchSpawn( trigger )
 	// have to do this inline since we capture the completionCallback
 	trigger.SetEnterCallback( void function( entity trigger, entity player ) : ( canBoardCallback, dropship )
@@ -454,8 +390,8 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	}
 
 	// fly away
-	file.evacFlyAway = true
-	svGlobal.levelEnt.Signal( "EvacShipLeaves" )
+	EvacFlyAway = true
+	dropship.Signal( "EvacShipLeaves" )
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_end", evacNode )
 
 	SetTeamActiveObjective( evacTeam, "EG_DropshipExtractDropshipFlyingAway" )
@@ -488,8 +424,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	dropship.SetOrigin( file.spaceNode.GetOrigin() )
 	dropship.SetAngles( file.spaceNode.GetAngles() )
 	dropship.SetInvulnerable()
-	//dropship.Signal( "EvacOver" )
-	svGlobal.levelEnt.Signal( "EvacOver" )
+	dropship.Signal( "EvacOver" )
 	thread PlayAnim( dropship, "ds_space_flyby_dropshipA", file.spaceNode )
 
 	foreach( entity player in GetPlayerArray() )
@@ -510,9 +445,6 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 		// let evacing team able to see the ship again
 		dropship.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
 
-		// hide name
-		HideName( player )
-
 		// skybox
 		player.SetSkyCamera( GetEnt( SKYBOXSPACE ) )
 		Remote_CallFunction_NonReplay( player, "ServerCallback_SetClassicSkyScale", dropship.GetEncodedEHandle(), 0.7 )
@@ -522,40 +454,8 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 		foreach ( entity otherPlayer in GetPlayerArray() )
 			Remote_CallFunction_NonReplay( otherPlayer, "ServerCallback_EvacObit", player.GetEncodedEHandle() )
 	}
-
-	// award player score to evacing team
-
-	array<entity> evacingPlayers
-	foreach ( entity player in GetPlayerArrayOfTeam( dropship.GetTeam() ) )
-	{
-		if ( !PlayerInDropship( player, dropship ) )
-			continue
-
-		evacingPlayers.append( player )
-	}
-
-	int evacCount = evacingPlayers.len()
-	bool allEvac = evacCount == GetPlayerArrayOfTeam( dropship.GetTeam() ).len()
-
-	foreach(entity player in evacingPlayers)
-	{
-		if ( !PlayerInDropship( player, dropship ) )
-			continue
-
-		AddPlayerScore( player, "HotZoneExtract" )
-		UpdatePlayerStat( player, "misc_stats", "evacsSurvived" )
-
-		if ( allEvac )
-			AddPlayerScore( player, "TeamBonusFullEvac" )
-	}
-
-	// sole survivor (but not the only one on the team)
-	if ( evacCount == 1 && !allEvac )
-	{
-		// we can assume there is one player in the array because otherwise evacCount wouldn't be 1
-		AddPlayerScore( evacingPlayers[0], "SoleSurvivor" )
-	}
 }
+
 
 void function AddPlayerToEvacDropship( entity dropship, entity player )
 {
@@ -575,19 +475,19 @@ void function AddPlayerToEvacDropship( entity dropship, entity player )
 	if ( !PlayerInDropship( player, dropship ) )
 		return
 
-	// add evac score
-	UpdatePlayerStat( player, "misc_stats", "evacsAttempted" )
-
     // need to cancel if the dropship dies
     dropship.EndSignal( "OnDeath", "OnDestroy" )
 
 	player.SetInvulnerable()
 	player.UnforceCrouch()
 	player.ForceStand()
-	if( file.evacFlyAway )
+	if( EvacFlyAway )
 	{
-		Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" ) // hud should be disabled here
-		player.HolsterWeapon()
+		if ( IsValid( player ) )
+		{
+			Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" ) // hud should be disabled here
+			player.HolsterWeapon()
+		}
 	}
 
 	FirstPersonSequenceStruct fp
@@ -636,6 +536,32 @@ void function EvacDropshipKilled( entity dropship, var damageInfo )
 	}
 }
 
+// if there's no player left in evacing team, we end this match
+void function CheckIfAnyPlayerLeft( int evacTeam )
+{
+	wait GAME_EPILOGUE_PLAYER_RESPAWN_LEEWAY
+	float startTime = Time()
+
+	OnThreadEnd(
+		function() : ( evacTeam )
+		{
+			if( GetPlayerArrayOfTeam_Alive( evacTeam ).len() == 0 ) // only call these if team wiped
+			{
+			SetTeamActiveObjective( evacTeam, "EG_DropshipExtractEvacPlayersKilled" )
+			SetTeamActiveObjective( GetOtherTeam( evacTeam ), "EG_StopExtractEvacPlayersKilled" )
+			thread EvacEpilogueCompleted( null )
+			}
+		}
+	)
+
+	while( true )
+	{
+		if( GetGameState() == eGameState.Postmatch )
+			return
+		WaitFrame()
+	}
+}
+
 void function DropShipTempHide( entity dropship )
 {
 	dropship.kv.VisibilityFlags = 0 // or it will still shows the jetpack fxs
@@ -669,7 +595,7 @@ EvacShipSetting function GetEvacShipSettingByTeam( int team )
 void function EvacDropshipDamaged( entity evacShip, var damageInfo )
 {
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
-	if( damageSourceID == damagedef_nuclear_core || damageSourceID == eDamageSourceId.mp_weapon_cruise_missile )
+	if( damageSourceID == damagedef_nuclear_core )
 		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * 0.2 )
 }
 

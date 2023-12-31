@@ -171,7 +171,6 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 	}
 
 	mfd = {
-		earn_meter_pilot_multiplier = "2"
 		scorelimit = "16"
 		timelimit = "12"
 	}

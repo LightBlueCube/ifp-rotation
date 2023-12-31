@@ -786,7 +786,7 @@ void function KillPlayerOnGround( var ent )
 	for( ;; )
 	{
 		WaitFrame()
-		if( player.IsOnGround() )
+		if( player.IsOnGround() && !player.IsWallRunning() && !player.IsWallHanging() )
 			break
 		if( player.IsHuman() && IsValid( player.GetParent() ) )
 			break

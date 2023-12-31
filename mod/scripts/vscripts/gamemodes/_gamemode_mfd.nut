@@ -279,7 +279,7 @@ void function UpdateMarksForKill( entity victim, entity attacker, var damageInfo
 			PlayFactionDialogueToPlayer( "mfd_youKilledMark", attacker )
 			attacker.SetPlayerGameStat( PGS_ASSAULT_SCORE, attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) + 1 )
 			attacker.s.NukeTitan += 1
-			thread SendAnnouncementMessageWaiting( attacker, "獲得核武泰坦！", 4 )
+			thread SendAnnouncementMessageWaiting( attacker, "獲得核武泰坦！", 2 )
 		}
 	}
 	else

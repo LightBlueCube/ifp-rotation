@@ -130,7 +130,7 @@ void function RandomMap( string mode )
 const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	baseData = {
-		max_players = "10"
+		max_players = "12"
 		titan_shield_regen = "1"
 		earn_meter_pilot_multiplier = "1"
 		respawn_delay = "0"

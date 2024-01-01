@@ -20,7 +20,7 @@ void function GamemodeTTDM_Init()
 	// probably needs scoreevent earnmeter values
 	SetUpTTDMScoreEvents() // northstar missing
 
-	Rodeo_SetBatteryPickupAllowed( true )
+	Rodeo_SetTitanPickupBatteryAllowed( true )
 	AddCallback_OnLastMinute( OnLastMinute )
 	SetKillStreakEnable( false )
 	AddCallback_OnPlayerRespawned( OnPlayerRespawned )

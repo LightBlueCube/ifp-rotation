@@ -44,7 +44,7 @@ void function GamemodeAITdm_Init()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.20 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.35 )

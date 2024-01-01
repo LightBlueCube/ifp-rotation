@@ -113,7 +113,8 @@ void function RandomMap( string mode )
 	}
 
 	string map = file.mapPlaylist[i]
-	SendHudMessageToAll( "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
+	foreach( player in GetPlayerArray() )
+		SendHudMessageWithPriority( player, 102, "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
 
 	wait GAME_POSTMATCH_LENGTH - 0.1
 

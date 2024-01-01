@@ -1608,7 +1608,7 @@ void function InitDefaultTurretDamageCallbacks()
 	FW_Turret_AddFinalDamageCallback( TurretDamageModifier )
 }
 
-const float TURRET_NUKE_DAMAGE_FRAC = 0.33 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
+const float TURRET_NUKE_DAMAGE_FRAC = 0.5 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
 const float TURRET_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float TURRET_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 

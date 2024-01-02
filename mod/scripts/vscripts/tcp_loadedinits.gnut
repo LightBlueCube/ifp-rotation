@@ -7,7 +7,6 @@ void function InfiniteFirepower_Init()
 	RandomMap_Init()
 	// 设置对局结束时显示在换图提示下方的文字
 	ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式\nQQ群:150381961 @LightBlueCube" )
-
 	// 如果注释了RandomMap_Init()，请务必将此处一并注释
 	// 如果获取到的随机地图播放列表为空，终止操作，等待RandomMap_Init()初始化播放列表并换图
 	if( GetConVarString( "random_map_playlist" ) == "" )
@@ -24,9 +23,13 @@ void function InfiniteFirepower_Init()
 
 	// 客制化泰坦
 	TitanChange_Init()
+	// 泰坦配装提示
+	TitanLoadoutTips_Init()
 
-	// 客制化铁驭技能
-	SkillChange_Init()
+	// 客制化铁驭
+	PilotChange_Init()
+	// 铁驭配装提示
+	PilotLoadoutTips_Init()
 
 	// 连杀系统
 	KillStreak_Init()
@@ -36,6 +39,11 @@ void function InfiniteFirepower_Init()
 
 	// 打乱队伍
 	TeamShuffle_Init()
+
+	// 使用此函数关闭一代训牛术
+	//ClassicRodeo_SetEnabled( false )
+	// 使用此函数来关闭更好的重生点选点
+	//SetBetterRespawnPointEnable( false )
 
 	// 反挂机
 	AntiAFK_Init()
@@ -47,9 +55,6 @@ void function InfiniteFirepower_Init()
 	AntiAFK_SetKickWarningTime( 90 )
 	// 踢出阈值
 	AntiAFK_SetKickTime( 120 )
-
-	// 使用此函数来关闭更好的重生点选点
-	//SetBetterRespawnPointEnable( false )
 
 	// 反蹲起
 	AntiInsult_Init()
@@ -64,7 +69,7 @@ void function InfiniteFirepower_Init()
 	AutoShutdown_Init()
 
 	// DEV: 跟踪泰坦使用频次和记录各泰坦的kd，在rotation中我们只记录这几个模式的泰坦数据
-	if( [ "aitdm", "at", "cp" ].contains( GameRules_GetGameMode() ) )
+	if( [ "aitdm", "cp" ].contains( GameRules_GetGameMode() ) )
 		DevTrackUsage_Init()	//DEV: 跟踪泰坦使用频次和记录各泰坦的kd
 
 	// override killstreak data!

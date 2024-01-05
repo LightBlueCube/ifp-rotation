@@ -256,22 +256,40 @@ void function AT_PlayerTitleThink( entity player )
 
 	while ( true )
 	{
+		WaitFrame()
 		if ( GetGameState() == eGameState.Playing )
 		{
-			// Set player money count
-			player.SetTitle( "$" + string( AT_GetPlayerBonusPoints( player ) ) )
+			string title = "$" + string( AT_GetPlayerBonusPoints( player ) )
+
+			entity soul = player.GetTitanSoul()
+			if( IsValid( soul ) )
+				if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
+					title += " - 反應爐外漏"
+
+			if( title == player.GetTitle() )
+				continue
+			player.SetTitle( title )
 		}
 		else if ( GetGameState() >= eGameState.WinnerDetermined )
 		{
 			if ( player.IsTitan() )
-				player.SetTitle( GetTitanPlayerTitle( player ) )
+			{
+				entity soul = player.GetTitanSoul()
+				if( !IsValid( soul ) )
+					return
+				string title = GetTitanPlayerTitle( player )
+				if( "titanTitle" in soul.s )
+					title = expect string( soul.s.titanTitle )
+				if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
+					title += " - 反應爐外漏"
+
+				player.SetTitle( title )
+			}
 			else
 				player.SetTitle( "" )
 
 			return
 		}
-
-		WaitFrame()
 	}
 }
 

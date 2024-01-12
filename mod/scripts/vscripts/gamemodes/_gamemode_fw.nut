@@ -2192,6 +2192,11 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_tracker_rockets:
 			DamageInfo_ScaleDamage( damageInfo, HARVESTER_LOCKON_DAMAGE_FRAC )
 			break
+
+		// arc cannon no damage bug fix, i have no idea so hardcode here
+		case eDamageSourceId.mp_titanweapon_arc_cannon:
+			DamageInfo_SetDamage( damageInfo, 2000 )
+			break
 	}
 
 	// run modded weapon damage modifiers

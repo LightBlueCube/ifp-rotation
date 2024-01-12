@@ -263,8 +263,12 @@ void function AT_PlayerTitleThink( entity player )
 
 			entity soul = player.GetTitanSoul()
 			if( IsValid( soul ) )
+			{
 				if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
 					title += " - 反應爐外漏"
+				else if( "titanTitle" in soul.s )
+					title += " - " + expect string( soul.s.titanTitle )
+			}
 
 			if( title == player.GetTitle() )
 				continue

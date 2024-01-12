@@ -54,6 +54,7 @@ void function AiGameModes_SpawnDropShip( vector pos, vector rot, int team, int c
 
 	//specialist grunt!
 	SetUpSpecialistGrunt( guys[0] )
+	GiveNPCBattery( guys[ RandomIntRange( 1, guys.len() ) ] )
 
 	foreach ( guy in guys )
 	{
@@ -101,8 +102,8 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 		}
 	}
 
-	if( content == "npc_spectre" )
-		GiveNPCBattery( guys[ RandomInt( guys.len() ) ] )
+	if( content == "npc_soldier" )
+		GiveNPCBattery( guys[ RandomIntRange( 1, guys.len() ) ] )
 
 	ActivateFireteamDropPod( pod, guys )
 

@@ -125,12 +125,12 @@ void function RandomMap( string mode )
 }
 
 
-// WARNING!!!! Respawn doesnt give way to clear the playlist overrides without map is mp_lobby
-// so if u added a new playlistvar overrides, then u also need add this playlistvar's default value in "baseData" or other gamemodes data
+// WARNING!!!! Respawn doesnt give way to clear the playlist overrides without map "mp_lobby"
+// so if u added a new playlistvar overrides, then u also need add this playlistvar's default value in "baseData" or other gamemode`s data
 const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	baseData = {
-		max_players = "12"
+		max_players = "10"
 		titan_shield_regen = "1"
 		earn_meter_pilot_multiplier = "1"
 		respawn_delay = "0"

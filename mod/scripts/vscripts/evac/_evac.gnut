@@ -329,7 +329,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 			continue
 		if( player.GetTeam() != evacTeam )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "", < 50, 50, 225 >, 255, 5 )
+		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離將在下局獲得隨機連殺獎勵", < 50, 50, 225 >, 255, 5 )
 	}
 
 	// hover sound

@@ -2195,7 +2195,7 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 
 		// arc cannon no damage bug fix, i have no idea so hardcode here
 		case eDamageSourceId.mp_titanweapon_arc_cannon:
-			DamageInfo_SetDamage( damageInfo, 2000 )
+			DamageInfo_SetDamage( damageInfo, 5000 )
 			break
 	}
 

@@ -28,7 +28,7 @@ const array<string> MAPS_FW = [
 	"mp_crashsite3",
 	"mp_complex3" ]
 
-const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "fw", "ttdm",/* "ctf",*/ "mfd" ]
+const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
 
 struct{
 	array<string> mapPlaylist = []
@@ -46,6 +46,12 @@ void function RandomMap_Init()
 		return
 	}
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+
+	AddChatCommandCallback( "!v", GetVote )
+	AddChatCommandCallback( "!V", GetVote )
+	AddChatCommandCallback( "！v", GetVote )
+	AddChatCommandCallback( "！V", GetVote )
 }
 
 void function ShowCustomTextOnPostmatch( string text )
@@ -53,12 +59,105 @@ void function ShowCustomTextOnPostmatch( string text )
 	file.customText = text
 }
 
-void function GameStateEnter_Postmatch()
+void function OnPlaying()
 {
-	thread RandomGameMode()
+	thread VoteForGamemode()
 }
 
-void function RandomGameMode()
+bool function GetVote( entity player, array<string> args )
+{
+	if( !voteStatus )
+		return false
+	if( args.len() != 1 )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m错误的指令参数或为空参数！", false, false )
+		return true
+	}
+	int id = args[0].tointeger()
+	id -= 1
+	if( id < 0 || id > options.len() )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m错误的投票选项！", false, false )
+		return true
+	}
+	if( hasVotedPlayers.contains( player.GetUID() ) )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m你已经投过票了！", false, false )
+		return true
+	}
+
+	vote[id] += 1
+	Chat_ServerPrivateMessage( player, "\x1b[36m你投票给了 "+ GetModeName( options[id] ), false, false )
+	hasVotedPlayers.append( player.GetUID() )
+	return true
+}
+
+array<string> options = [ "aitdm", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
+array<int> vote = [ 0, 0, 0, 0, 0, 0, 0 ]
+array<string> hasVotedPlayers = []
+array<string> targetOptions = []
+bool voteStatus = false
+
+void function VoteForGamemode()
+{
+	int waitTime = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60 - 150
+	wait waitTime
+
+	// start vote
+	voteStatus = true
+	for( int i = 60; i > 0; i -=5 )
+	{
+		array<string> text = []
+		for( int i = 0; i < options.len(); i++ )
+			text.append( GetModeName( options[i] ) +" ("+ vote[i] +"票)" )
+		foreach( entity player in GetPlayerArray() )
+			NSCreatePollOnPlayer( player, "聊天欄輸入 !v 数字 來投票決定下局游戲模式 剩余:"+ i +"秒", text, 4.8 )
+		wait 5
+	}
+	voteStatus = false
+	array<string> text = []
+	for( int i = 0; i < options.len(); i++ )
+		text.append( GetModeName( options[i] ) +" ("+ vote[i] +"票)" )
+	foreach( entity player in GetPlayerArray() )
+		NSCreatePollOnPlayer( player, "投票結束！展示投票結果", text, 4.8 )
+
+	wait 5
+
+	int score = 0
+	for( int i = 0; i < options.len(); i++ )
+	{
+		if( vote[i] < score )
+			continue
+		score = vote[i]
+		if( score == vote[i] )
+			targetOptions.append( options[i] )
+		else
+			targetOptions = [ options[i] ]
+	}
+
+	text = []
+	if( targetOptions.len() > 1 )
+	{
+		foreach( s in targetOptions )
+			text.append( GetModeName( s ) +" ("+ score +"票)" )
+		foreach( entity player in GetPlayerArray() )
+			NSCreatePollOnPlayer( player, "將從以下模式中隨機抽取做下局游戲模式", text, 5 )
+	}
+	else
+	{
+		foreach( s in targetOptions )
+			text.append( GetModeName( s ) +" ("+ score +"票)" )
+		foreach( entity player in GetPlayerArray() )
+			NSCreatePollOnPlayer( player, "以下游戲模式將做下局游戲模式", text, 5 )
+	}
+}
+
+void function GameStateEnter_Postmatch()
+{
+	thread RandomGameMode( targetOptions )
+}
+
+void function RandomGameMode( array<string> allowlist = [] )
 {
 	if( file.modePlaylist.len() == 0 )
 	{
@@ -74,13 +173,19 @@ void function RandomGameMode()
 		i++
 	}
 
-	if( file.modePlaylist.len() - 1 == i )
+	for( ;; )
 	{
-		file.modePlaylist = RandomArrayElem( GAMEMODES_ALL )
-		i = 0
+		if( file.modePlaylist.len() - 1 == i )
+		{
+			file.modePlaylist = RandomArrayElem( GAMEMODES_ALL )
+			i = 0
+		}
+		else
+			i++
+
+		if( allowlist.contains( file.modePlaylist[i] ) )
+			break
 	}
-	else
-		i++
 	RandomMap( file.modePlaylist[i] )
 }
 

@@ -145,7 +145,7 @@ void function OnLastMinute()
 	int teamScore = GameRules_GetTeamScore( team )
 	int otherTeamScore = GameRules_GetTeamScore( otherTeam )
 
-	int teamScoreAddition = abs( otherTeamScore - teamScore ) / 400 + 2
+	int teamScoreAddition = abs( otherTeamScore - teamScore ) / 500 + 2
 	SetTeamScoreAddition( teamScoreAddition )
 	foreach( player in GetPlayerArray() )
 	{

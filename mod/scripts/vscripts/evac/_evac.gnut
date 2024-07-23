@@ -85,6 +85,7 @@ void function Evac_Init()
 	EvacShared_Init()
 	RegisterSignal( "EvacShipLeaves" )
 	RegisterSignal( "EvacOver" )
+	RegisterSignal( "Evac_DamageConstraint" )
 
 	PrecacheParticleSystem( FX_EVAC_MARKER )
 }
@@ -592,11 +593,32 @@ EvacShipSetting function GetEvacShipSettingByTeam( int team )
 	return tempSetting
 }
 
+float damageConstraint = 5000
+
 void function EvacDropshipDamaged( entity evacShip, var damageInfo )
 {
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
-	if( damageSourceID == damagedef_nuclear_core )
-		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * 0.2 )
+	if( damageSourceID != damagedef_nuclear_core )
+		return
+	float damage = DamageInfo_GetDamage( damageInfo )
+	float frac = ( damageConstraint * 0.5 ) / ( damage * 0.2 )
+	printt( DamageInfo_GetDamage( damageInfo ) * 0.2 +"\n"+ damageConstraint * 0.5 +"\n"+ frac )
+	if( frac > 1 )
+		frac = 1
+	if( frac < 0.1 )
+		frac = 0.1
+	DamageInfo_ScaleDamage( damageInfo, 0.2 * frac )
+	if( frac != 0.1 )
+		damageConstraint -= damage * 0.2 * frac
+	thread DamageConstraintRegen()
+}
+
+void function DamageConstraintRegen()
+{
+	svGlobal.levelEnt.Signal( "Evac_DamageConstraint" )
+	svGlobal.levelEnt.EndSignal( "Evac_DamageConstraint" )
+	wait 1.0
+	damageConstraint = 5000
 }
 
 void function WarpInEffectEvacShip( entity dropship )

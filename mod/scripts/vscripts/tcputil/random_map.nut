@@ -45,8 +45,7 @@ void function RandomMap_Init()
 		thread RandomGameMode()
 		return
 	}
-	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
-	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+	AddCallback_SetCustomPostMatchLength( VoteForGamemode )
 
 	AddChatCommandCallback( "!v", GetVote )
 	AddChatCommandCallback( "!V", GetVote )
@@ -57,11 +56,6 @@ void function RandomMap_Init()
 void function ShowCustomTextOnPostmatch( string text )
 {
 	file.customText = text
-}
-
-void function OnPlaying()
-{
-	thread VoteForGamemode()
 }
 
 bool function GetVote( entity player, array<string> args )
@@ -95,66 +89,38 @@ bool function GetVote( entity player, array<string> args )
 array<string> options = [ "aitdm", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
 array<int> vote = [ 0, 0, 0, 0, 0, 0, 0 ]
 array<string> hasVotedPlayers = []
-array<string> targetOptions = []
 bool voteStatus = false
 
 void function VoteForGamemode()
 {
-	int waitTime = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60 - 150
-	wait waitTime
-
 	// start vote
 	voteStatus = true
-	for( int i = 60; i > 0; i -=5 )
+	for( int i = 20 * 10; i > 0; i -= 1 )
 	{
-		array<string> text = []
+		string text = ""
 		for( int i = 0; i < options.len(); i++ )
-			text.append( GetModeName( options[i] ) +" ("+ vote[i] +"票)" )
+			text += i + 1 +": "+ GetModeName( options[i] ) +" ("+ vote[i] +"票)\n"
 		foreach( entity player in GetPlayerArray() )
-			NSCreatePollOnPlayer( player, "聊天欄輸入 !v 数字 來投票決定下局游戲模式 剩余:"+ i +"秒", text, 4.8 )
-		wait 5
+			SendHudMessageWithPriority( player, 102, "聊天栏输入 !v 数字 来进行投票选择下一局的游戏模式\n注意是 !v 数字 不是 !v数字\n"+ text +"剩余时间:"+ float( i ) / 10 +"s", -1, 0.3, < 200, 200, 255 >, < 0.0, 0.2, 0 > )
+		wait 0.1
 	}
-	voteStatus = false
-	array<string> text = []
-	for( int i = 0; i < options.len(); i++ )
-		text.append( GetModeName( options[i] ) +" ("+ vote[i] +"票)" )
-	foreach( entity player in GetPlayerArray() )
-		NSCreatePollOnPlayer( player, "投票結束！展示投票結果", text, 4.8 )
-
-	wait 5
 
 	int score = 0
+	array<string> allowlist = []
 	for( int i = 0; i < options.len(); i++ )
 	{
 		if( vote[i] < score )
 			continue
-		score = vote[i]
+
 		if( score == vote[i] )
-			targetOptions.append( options[i] )
+			allowlist.append( options[i] )
 		else
-			targetOptions = [ options[i] ]
+			allowlist = [ options[i] ]
+
+		score = vote[i]
 	}
 
-	text = []
-	if( targetOptions.len() > 1 )
-	{
-		foreach( s in targetOptions )
-			text.append( GetModeName( s ) +" ("+ score +"票)" )
-		foreach( entity player in GetPlayerArray() )
-			NSCreatePollOnPlayer( player, "將從以下模式中隨機抽取做下局游戲模式", text, 5 )
-	}
-	else
-	{
-		foreach( s in targetOptions )
-			text.append( GetModeName( s ) +" ("+ score +"票)" )
-		foreach( entity player in GetPlayerArray() )
-			NSCreatePollOnPlayer( player, "以下游戲模式將做下局游戲模式", text, 5 )
-	}
-}
-
-void function GameStateEnter_Postmatch()
-{
-	thread RandomGameMode( targetOptions )
+	RandomGameMode( allowlist )
 }
 
 void function RandomGameMode( array<string> allowlist = [] )
@@ -183,7 +149,7 @@ void function RandomGameMode( array<string> allowlist = [] )
 		else
 			i++
 
-		if( allowlist.contains( file.modePlaylist[i] ) )
+		if( allowlist.len() == 0 || allowlist.contains( file.modePlaylist[i] ) )
 			break
 	}
 	RandomMap( file.modePlaylist[i] )
@@ -221,8 +187,7 @@ void function RandomMap( string mode )
 	foreach( player in GetPlayerArray() )
 		SendHudMessageWithPriority( player, 102, "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
 
-	wait GAME_POSTMATCH_LENGTH - 0.1
-
+	wait 5
 	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
 	StoreStringArrayIntoConVar( file.modePlaylist, "random_mode_playlist" )
 	RandomGamemode_SetPlaylistVarOverride( mode )

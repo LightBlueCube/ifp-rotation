@@ -142,6 +142,7 @@ void function GamemodeFW_Init()
 {
 	// _battery_port.gnut needs this
 	RegisterSignal( "BatteryActivate" )
+	RegisterSignal( "DamageConstraint" )
 
 	if( GetMapName() == "mp_thaw" )	// mp_thaw's intro spawnpoint have some problem, player can stucks on the sky, so we override it
 		SetSpawnpointGamemodeOverride( TEAM_DEATHMATCH )
@@ -1637,6 +1638,10 @@ void function TurretDamageModifier( entity turret, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_tracker_rockets:
 			DamageInfo_ScaleDamage( damageInfo, TURRET_LOCKON_DAMAGE_FRAC )
 			break
+
+		case damagedef_titan_fall:
+			DamageInfo_SetDamage( damageInfo, 0 )
+			break
 	}
 
 	// run modded weapon damage modifiers
@@ -2156,6 +2161,8 @@ const float HAVESTER_NUKE_DAMAGE_FRAC = 0.2 // for nuke titans. normally player 
 const float HAVESTER_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float HARVESTER_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 
+float damageConstraint = 8000
+
 void function HarvesterDamageModifier( entity harvester, var damageInfo )
 {
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
@@ -2172,7 +2179,14 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 
 		// nuke
 		case damagedef_nuclear_core:
-			DamageInfo_ScaleDamage( damageInfo, HAVESTER_NUKE_DAMAGE_FRAC )
+			float damage = DamageInfo_GetDamage( damageInfo )
+			float frac = ( damageConstraint * 0.5 ) / ( damage * HAVESTER_NUKE_DAMAGE_FRAC )
+			printt( DamageInfo_GetDamage( damageInfo ) * 0.2 +"\n"+ damageConstraint * 0.5 +"\n"+ frac )
+			if( frac > 1 )
+				frac = 1
+			DamageInfo_ScaleDamage( damageInfo, HAVESTER_NUKE_DAMAGE_FRAC * frac )
+			damageConstraint -= damage * HAVESTER_NUKE_DAMAGE_FRAC * frac
+			thread DamageConstraintRegen()
 			break
 
 		// damage over time
@@ -2197,6 +2211,10 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_arc_cannon:
 			DamageInfo_SetDamage( damageInfo, 5000 )
 			break
+
+		case damagedef_titan_fall:
+			DamageInfo_SetDamage( damageInfo, 0 )
+			break
 	}
 
 	// run modded weapon damage modifiers
@@ -2209,6 +2227,14 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 	if( balanceFrac > 4.0 )
 		balanceFrac = 4.0
 	DamageInfo_ScaleDamage( damageInfo, balanceFrac )
+}
+
+void function DamageConstraintRegen()
+{
+	svGlobal.levelEnt.Signal( "DamageConstraint" )
+	svGlobal.levelEnt.EndSignal( "DamageConstraint" )
+	wait 2
+	damageConstraint = 8000
 }
 
 void function HarvesterPostDamageModifier( entity harvester, var damageInfo )
@@ -2443,7 +2469,7 @@ void function SetPilotObjective( entity player, entity titan )
 
 void function FW_InitBatteryPort( entity batteryPort )
 {
-	batteryPort.kv.fadedist = 10000 // try not to fade
+	batteryPort.kv.fadedist = 8000 // try not to fade
 	InitTurretBatteryPort( batteryPort )
 
 	batteryPort.s.relatedTurret <- null             // entity, for saving batteryPort's nearest turret

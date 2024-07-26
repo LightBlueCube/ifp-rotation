@@ -28,7 +28,7 @@ const array<string> MAPS_FW = [
 	"mp_crashsite3",
 	"mp_complex3" ]
 
-const array<string> GAMEMODES_ALL = [ "aitdm", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
+const array<string> GAMEMODES_ALL = [ "aitdm", "ps", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
 
 struct{
 	array<string> mapPlaylist = []
@@ -38,6 +38,8 @@ struct{
 
 void function RandomMap_Init()
 {
+	RegisterSignal( "PostmatchVoteOver" )
+
 	file.mapPlaylist = GetStringArrayFromConVar( "random_map_playlist" )
 	file.modePlaylist = GetStringArrayFromConVar( "random_mode_playlist" )
 	if( file.mapPlaylist.len() == 0 && file.modePlaylist.len() == 0 )
@@ -86,8 +88,8 @@ bool function GetVote( entity player, array<string> args )
 	return true
 }
 
-array<string> options = [ "aitdm", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
-array<int> vote = [ 0, 0, 0, 0, 0, 0, 0 ]
+array<string> options = [ "aitdm", "ps", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
+array<int> vote = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
 array<string> hasVotedPlayers = []
 bool voteStatus = false
 
@@ -120,6 +122,7 @@ void function VoteForGamemode()
 		score = vote[i]
 	}
 
+	svGlobal.levelEnt.Signal( "PostmatchVoteOver" )
 	RandomGameMode( allowlist )
 }
 
@@ -212,6 +215,11 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 		timelimit = "16"
 	}
 
+	ps = {
+		scorelimit = "2147483647"
+		timelimit = "16"
+	}
+
 	at = {
 		enable_spectre_hacking = "0"
 		scorelimit = "10000"
@@ -220,7 +228,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	cp = {
 		scorelimit = "2147483647"
-		timelimit = "12"
+		timelimit = "16"
 	}
 
 	fw = {
@@ -243,7 +251,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	mfd = {
 		scorelimit = "16"
-		timelimit = "12"
+		timelimit = "10"
 	}
 }
 
@@ -266,6 +274,8 @@ string function GetModeName( string mode )
 	{
 		case "aitdm":
 			return "消耗戰"
+		case "ps":
+			return "鉄馭對鉄馭"
 		case "at":
 			return "賞金追緝"
 		case "cp":

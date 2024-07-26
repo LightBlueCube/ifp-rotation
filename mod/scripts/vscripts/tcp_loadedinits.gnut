@@ -75,9 +75,9 @@ void function LoadedInits_Init()
 	// override killstreak data!
 	SetKillStreakData({
 		nukeTitan = 5
-		cruiseMissile = 13
+		cruiseMissile = 12
 		vtol = 10
-		orbitalStrike = 10
+		orbitalStrike = 8
 		nuclearBomb = 20
 	})
 	SetRandomKillStreakFunction( RandomKillStreakFunc )

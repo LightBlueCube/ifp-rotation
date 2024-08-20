@@ -144,7 +144,7 @@ void function GamemodeFW_Init()
 	RegisterSignal( "BatteryActivate" )
 	RegisterSignal( "DamageConstraint" )
 
-	if( GetMapName() == "mp_thaw" )	// mp_thaw's intro spawnpoint have some problem, player can stucks on the sky, so we override it
+	if( GetMapName() == "mp_thaw" )	// mp_thaw's intro spawnpoint have some problem, player sometimes can be stucked on the sky, so override it
 		SetSpawnpointGamemodeOverride( TEAM_DEATHMATCH )
 
 	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender" ] )
@@ -460,6 +460,34 @@ void function SetUpFWScoreEvents()
 	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Four", 0.0, 0.10, 0.5 ) // give less meter if controlled most turrets
 	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Five", 0.0, 0.05, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Six", 0.0, 0.05, 0.5 )
+
+
+	// display type
+	// default case is adding a eEventDisplayType.CENTER, required for client to show earnvalue on screen
+	ScoreEvent_SetEventDisplayTypes( "KillHeavyTurret", GetScoreEvent( "KillHeavyTurret" ).displayType | eEventDisplayType.CENTER )
+
+	ScoreEvent_SetEventDisplayTypes( "FortWarAssault", GetScoreEvent( "FortWarAssault" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarDefense", GetScoreEvent( "FortWarDefense" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarPerimeterDefense", GetScoreEvent( "FortWarPerimeterDefense" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarSiege", GetScoreEvent( "FortWarSiege" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarSnipe", GetScoreEvent( "FortWarSnipe" ).displayType | eEventDisplayType.CENTER )
+
+	ScoreEvent_SetEventDisplayTypes( "FortWarBaseConstruction", GetScoreEvent( "FortWarBaseConstruction" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarForwardConstruction", GetScoreEvent( "FortWarForwardConstruction" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarInvasiveConstruction", GetScoreEvent( "FortWarInvasiveConstruction" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarResourceDenial", GetScoreEvent( "FortWarResourceDenial" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarSecuringGatheredResources", GetScoreEvent( "FortWarSecuringGatheredResources" ).displayType | eEventDisplayType.CENTER )
+
+	ScoreEvent_SetEventDisplayTypes( "FortWarTowerDamage", GetScoreEvent( "FortWarTowerDamage" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTowerDefense", GetScoreEvent( "FortWarTowerDefense" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarShieldDestroyed", GetScoreEvent( "FortWarShieldDestroyed" ).displayType | eEventDisplayType.CENTER )
+
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_One", GetScoreEvent( "FortWarTeamTurretControlBonus_One" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_Two", GetScoreEvent( "FortWarTeamTurretControlBonus_Two" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_Three", GetScoreEvent( "FortWarTeamTurretControlBonus_Three" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_Four", GetScoreEvent( "FortWarTeamTurretControlBonus_Four" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_Five", GetScoreEvent( "FortWarTeamTurretControlBonus_Five" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "FortWarTeamTurretControlBonus_Six", GetScoreEvent( "FortWarTeamTurretControlBonus_Six" ).displayType | eEventDisplayType.CENTER )
 }
 
 // consider this means victim recently damaged harvester
@@ -2198,7 +2226,9 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 			DamageInfo_ScaleDamage( damageInfo, HAVESTER_DOT_DAMAGE_FRAC )
 			break
 
+		// kill streak
 		case eDamageSourceId.mp_weapon_cruise_missile:
+		case eDamageSourceId.mp_weapon_scp018:
 			DamageInfo_ScaleDamage( damageInfo, 0.25 )
 			break
 
@@ -2469,7 +2499,7 @@ void function SetPilotObjective( entity player, entity titan )
 
 void function FW_InitBatteryPort( entity batteryPort )
 {
-	batteryPort.kv.fadedist = 8000 // try not to fade
+	batteryPort.kv.fadedist = 10000 // try not to fade
 	InitTurretBatteryPort( batteryPort )
 
 	batteryPort.s.relatedTurret <- null             // entity, for saving batteryPort's nearest turret

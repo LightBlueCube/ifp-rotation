@@ -97,14 +97,28 @@ void function VoteForGamemode()
 {
 	// start vote
 	voteStatus = true
-	for( int i = 20 * 10; i > 0; i -= 1 )
+	float endTime = Time() + 20
+	while( Time() < endTime )
 	{
 		string text = ""
+		int total = 0
+		bool skip = false
 		for( int i = 0; i < options.len(); i++ )
+		{
+			total += vote[i]
+			if( total == GetPlayerArray().len() || vote[i] > float( GetPlayerArray().len() ) / 2 )
+			{
+				skip = true
+				break
+			}
+
 			text += i + 1 +": "+ GetModeName( options[i] ) +" ("+ vote[i] +"票)\n"
+		}
 		foreach( entity player in GetPlayerArray() )
-			SendHudMessageWithPriority( player, 102, "聊天栏输入 !v 数字 来进行投票选择下一局的游戏模式\n注意是 !v 数字 不是 !v数字\n"+ text +"剩余时间:"+ float( i ) / 10 +"s", -1, 0.3, < 200, 200, 255 >, < 0.0, 0.2, 0 > )
-		wait 0.1
+			SendHudMessageWithPriority( player, 102, "聊天栏输入 !v 数字\n来进行投票选择下一局的游戏模式\n注意是 !v 数字 不是 !v数字\n"+ text +"剩余时间:"+ int( endTime - Time() ) +"s", -1, 0.3, < 200, 200, 255 >, < 0.0, 0.2, 0 > )
+		if( skip )
+			break
+		WaitFrame()
 	}
 
 	int score = 0

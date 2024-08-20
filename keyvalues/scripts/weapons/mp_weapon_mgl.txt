@@ -2,6 +2,13 @@ WeaponData
 {
 	MP_BASE
 	{
+		"npc_damage_near_value"   						"20"
+		"npc_damage_far_value"							"20"
+		"npc_damage_near_value_titanarmor"				"330"
+		"npc_damage_far_value_titanarmor" 				"330"
+		"npc_explosion_damage"							"35"
+		"npc_explosion_damage_heavy_armor"				"70"
+
 		"npc_accuracy_multiplier_pilot"					"100.0"
 		"npc_min_burst"   								"2"
 		"npc_max_burst"   								"2"

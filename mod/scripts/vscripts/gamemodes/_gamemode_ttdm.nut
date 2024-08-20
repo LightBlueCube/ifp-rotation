@@ -1,5 +1,7 @@
 global function GamemodeTTDM_Init
 
+global function TTDMIntroSetup // welp this is just for fun, so we can share it with other script...
+
 const float TTDMIntroLength = 15.0
 
 void function GamemodeTTDM_Init()
@@ -77,7 +79,7 @@ void function TTDMIntroSetup()
 	//AddCallback_OnClientConnected( TTDMIntroShowIntermissionCam )
 	// vanilla behavior...
 	AddCallback_GameStateEnter( eGameState.Playing, TTDMGameStart )
-	AddCallback_OnClientConnected( TTDMIntroConntectedPlayer )
+AddCallback_OnClientConnected( TTDMIntroConntectedPlayer )
 }
 
 void function TTDMIntroStart()
@@ -96,8 +98,9 @@ void function TTDMIntroStartThreaded()
 		else
 			RespawnPrivateMatchSpectator( player )
 	}
-
-	wait TTDMIntroLength
+	// make this no longer a const value, so we can share it with other scripts...
+	//wait TTDMIntroLength
+	wait ClassicMP_GetIntroLength()
 
 	ClassicMP_OnIntroFinished()
 }
@@ -152,7 +155,9 @@ void function PlayerWatchesTTDMIntroIntermissionCam( entity player )
 	player.SetObserverModeStaticAngles( intermissionCam.GetAngles() )
 	player.StartObserverMode( OBS_MODE_STATIC_LOCKED )
 
-	wait TTDMIntroLength
+	// make this no longer a const value, so we can share it with other scripts...
+	//wait TTDMIntroLength
+	wait ClassicMP_GetIntroLength()
 
 	RespawnAsTitan( player, false )
 	TryGameModeAnnouncement( player )

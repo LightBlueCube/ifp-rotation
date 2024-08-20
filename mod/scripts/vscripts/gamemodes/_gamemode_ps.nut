@@ -35,6 +35,9 @@ void function GamemodePs_Init()
 
 	// tempfix specifics
 	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
+
+	// challenge fix
+	SetupGenericFFAChallenge()
 }
 
 void function OnLastMinute()

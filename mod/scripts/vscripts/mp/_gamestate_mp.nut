@@ -15,6 +15,8 @@ global function SetSwitchSidesBased
 global function SetSuddenDeathBased
 global function SetTimerBased
 global function SetShouldUseRoundWinningKillReplay
+// callback for helping other files deciding whether we should use round winning kill replay
+global function AddCallback_ShouldDoRoundWinningReplay
 
 global function SetRoundWinningKillReplayKillClasses
 global function SetUpRoundWinningKillReplayFromDamageInfo // this could handle all roundWinning kill replay stuffs
@@ -25,7 +27,7 @@ global function SetRoundWinningHighlightReplayPlayer
 global function SetRoundWinningKillReplayInflictor
 // northstar new adding callbacks
 global function SetCallback_TryUseProjectileReplay
-global function ShouldTryUseProjectileReplay
+global function ShouldUseProjectileReplay
 
 global function SetWinner
 // modified. we only do replay if game wins by player earning score
@@ -128,10 +130,12 @@ struct {
 	array<void functionref()> roundEndCleanupCallbacks
 	// new adding
 	array<void functionref()> matchEndCleanupCallbacks
+	// modified callbacks
+	array<bool functionref( entity victim, entity attacker, float replayLength, int methodOfDeath )> shouldDoRoundWinningReplayCallbacks
+	// northstar new adding callbacks
+	bool functionref( entity victim, entity attacker, var damageInfo, bool isRoundEnd ) tryUseProjectileReplayCallback
 	// ifp modify
 	void functionref() setCustomPostMatchLengthCallbacks
-	// northstar new adding callbacks
-	bool functionref( entity victim, entity attacker, var damageInfo, bool isRoundEnd ) shouldTryUseProjectileReplayCallback
 
 	// modified
 	float waitingForPlayersMaxDuration = 20.0
@@ -313,8 +317,10 @@ void function GameStateEnter_Prematch()
 void function StartGameWithoutClassicMP()
 {
 	foreach ( entity player in GetPlayerArray() )
+	{
 		if ( IsAlive( player ) )
 			player.Die()
+	}
 
 	WaitFrame() // wait for callbacks to finish
 
@@ -328,17 +334,53 @@ void function StartGameWithoutClassicMP()
 		{
 			// likely temp, deffo needs some work
 			if ( Riff_SpawnAsTitan() == 1 )	// spawn as titan
+			{
 				thread RespawnAsTitan( player )
+				ScreenFadeFromBlack( player, 1.0, 0.2 ) // a little bit hold time to prevent camera flash from <0,0,0> point
+			}
 			else // spawn as pilot
+			{
 				RespawnAsPilot( player )
+				ScreenFadeFromBlack( player, 1.0, 0.0 )
+			}
 		}
 
-		ScreenFadeFromBlack( player, 0 )
+		// better to have a screen fade like new-connecting players?
+		//ScreenFadeFromBlack( player, 0 )
 	}
 
 	SetGameState( eGameState.Playing )
+
+	// northstar missing: better set up a gamemode announcement
+	// this should be done by intros, but we don't have intros, so..
+	foreach ( entity player in GetPlayerArray() )
+	{
+		if ( !IsPrivateMatchSpectator( player ) )
+			thread NoClassicMPIntroGamemodeAnnouncement( player )
+	}
 }
 
+void function NoClassicMPIntroGamemodeAnnouncement( entity player )
+{
+	if ( IsPrivateMatchSpectator( player ) )
+		return
+
+	player.EndSignal( "OnDestroy" )
+
+	// respawning as pilot
+	if ( IsAlive( player ) )
+	{
+		player.EndSignal( "OnDeath" )
+		// wait for player screen fade from black, same wait as DelayedGamemodeAnnouncement() in _base_gametype_mp.gnut does
+		wait 1.7
+	}
+	else // respawning as titan
+	{
+		player.WaitSignal( "OnRespawned" )
+	}
+
+	TryGameModeAnnouncement( player )
+}
 
 // eGameState.Playing
 void function GameStateEnter_Playing()
@@ -460,14 +502,16 @@ void function GameStateEnter_WinnerDetermined_Threaded()
 			Remote_CallFunction_NonReplay( player, "ServerCallback_AnnounceWinner", winningTeam, announcementSubstr, ROUND_WINNING_KILL_REPLAY_SCREEN_FADE_TIME )
 	}
 
-	// add score for match end
-	// shared from _score.nut
-	ScoreEvent_MatchComplete( winningTeam, isMatchEnd )
-
 	WaitFrame() // wait a frame so other scripts can setup killreplay stuff
 
-	if( isMatchEnd ) // no winner dialogue till game really ends
-		DialoguePlayWinnerDetermined() // play a faction dialogue when winner is determined
+	// match end stuffs
+	if( isMatchEnd )
+	{
+		DialoguePlayWinnerDetermined() // play a faction dialogue when winner is determined. no winner dialogue till game really ends
+		ScoreEvent_MatchComplete( winningTeam )
+	}
+	else
+		ScoreEvent_RoundComplete( winningTeam )
 
 	// set gameEndTime to current time, so hud doesn't display time left in the match
 	SetServerVar( "gameEndTime", Time() )
@@ -613,6 +657,9 @@ void function GameStateEnter_WinnerDetermined_Threaded()
 	}
 	else
 	{
+		// challenge fix
+		RegisterChallenges_OnMatchEnd()
+
 		if ( ClassicMP_ShouldRunEpilogue() )
 		{
 			ClassicMP_SetupEpilogue()
@@ -1478,6 +1525,13 @@ void function SetShouldUseRoundWinningKillReplay( bool shouldUse )
 	SetServerVar( "roundWinningKillReplayEnabled", shouldUse )
 }
 
+// callback for helping other files deciding whether we should use round winning kill replay
+void function AddCallback_ShouldDoRoundWinningReplay( bool functionref( entity victim, entity attacker, float replayLength, int methodOfDeath ) callbackFunc )
+{
+	if ( !file.shouldDoRoundWinningReplayCallbacks.contains( callbackFunc ) )
+		file.shouldDoRoundWinningReplayCallbacks.append( callbackFunc )
+}
+
 bool function IsSwitchSidesBased_NorthStar()
 {
 	return file.switchSidesBased
@@ -1536,7 +1590,7 @@ void function SetRoundWinningKillReplayInflictor( entity inflictor, entity attac
 // northstar new adding callbacks
 void function SetCallback_TryUseProjectileReplay( bool functionref( entity victim, entity attacker, var damageInfo, bool isRoundEnd ) callbackFunc )
 {
-	file.shouldTryUseProjectileReplayCallback = callbackFunc
+	file.tryUseProjectileReplayCallback = callbackFunc
 }
 
 // northstar missing default callback
@@ -1553,12 +1607,12 @@ bool function DefaultCallback_TryUseProjectileReplay( entity victim, entity atta
 	return false
 }
 
-bool function ShouldTryUseProjectileReplay( entity victim, entity attacker, var damageInfo, bool isRoundEnd )
+bool function ShouldUseProjectileReplay( entity victim, entity attacker, var damageInfo, bool isRoundEnd )
 {
-	if ( file.shouldTryUseProjectileReplayCallback != null )
-		return file.shouldTryUseProjectileReplayCallback( victim, attacker, damageInfo, isRoundEnd )
+	if ( file.tryUseProjectileReplayCallback != null )
+		return file.tryUseProjectileReplayCallback( victim, attacker, damageInfo, isRoundEnd )
 
-	// default to true (vanilla behaviour)
+	// default to true (always do projectile replay)
 	return true
 }
 
@@ -1596,6 +1650,17 @@ void function SetUpRoundWinningKillReplayFromDamageInfo( entity victim, var dama
 	// need to do ShouldDoReplay() checks
 	if ( !ShouldDoReplay( victim, attacker, replayLength, methodOfDeath ) )
 		return
+	// specific callbacks for round winning kill replay
+	// Added via AddCallback_ShouldDoRoundWinningReplay
+	foreach ( callbackFunc in file.shouldDoRoundWinningReplayCallbacks )
+	{
+		// whenever a callback hits false, we return
+		if ( !callbackFunc( victim, attacker, replayLength, methodOfDeath ) )
+		{
+			print( "SetUpRoundWinningKillReplayFromDamageInfo(): failed to setup roundwinning replay because we failed custom checks.\n" )
+			return
+		}
+	}
 
 	// all checks passed, do replay stuffs
 	file.roundWinningKillReplayVictim = victim
@@ -1605,7 +1670,7 @@ void function SetUpRoundWinningKillReplayFromDamageInfo( entity victim, var dama
 	file.roundWinningKillReplayHealthFrac = GetHealthFrac( attacker )
 	// setup inflictor
 	// run northstar new adding callbacks
-	if ( ShouldTryUseProjectileReplay( victim, attacker, damageInfo, true ) ) // I think this can be considered as "roundEnd"?
+	if ( ShouldUseProjectileReplay( victim, attacker, damageInfo, true ) ) // I think this can be considered as "roundEnd"?
 		SetRoundWinningKillReplayInflictor( DamageInfo_GetInflictor( damageInfo ), attacker ) // inflictor isn't necessary, it's function has IsValid() checks
 	else
 		file.roundWinningKillReplayInflictorEHandle = attacker.GetEncodedEHandle() // a proper inflictor is always needed. by default they'll be attacker themselves

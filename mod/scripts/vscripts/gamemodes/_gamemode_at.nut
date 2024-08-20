@@ -37,7 +37,7 @@ const array<string> AT_DISABLE_SCOREEVENTS =
 const int AT_AI_TEAM = TEAM_BOTH               		// Allow AI to attack and be attacked by both player teams
 const float AT_FIRST_WAVE_START_DELAY = 10.0     	// First wave has an extra delay before begining
 const float AT_WAVE_TRANSITION_DELAY = 5.0       	// Time between each wave and banks opening/closing
-const float AT_WAVE_START_DELAY = 2.0 				// Extra wait before we start a wave
+const float AT_WAVE_START_DELAY = 0.0 				// Extra wait before we start a wave
 const float AT_WAVE_END_ANNOUNCEMENT_DELAY = 1.0 	// Extra wait before announcing wave cleaned
 const float AT_BANK_OPENING_DELAY = 4.0
 
@@ -265,7 +265,7 @@ void function AT_PlayerTitleThink( entity player )
 			if( IsValid( soul ) )
 			{
 				if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
-					title += " - 反應爐外漏"
+					title = expect string( soul.s.titanTitle ) +" - 反應爐外漏"
 				else if( "titanTitle" in soul.s )
 					title += " - " + expect string( soul.s.titanTitle )
 			}
@@ -534,7 +534,18 @@ void function AT_ScoreEventsValueSetUp()
 	ScoreEvent_SetEarnMeterValues( "AttritionStalkerKilled", 0.05, 0.050001, 0.4 ) // if set to "0.05, 0.05", will display as "9%"
 	ScoreEvent_SetEarnMeterValues( "AttritionSuperSpectreKilled", 0.15, 0.15, 0.67 )
 
-	// HACK
+
+	// display type
+	// default case is adding a eEventDisplayType.CENTER, required for client to show earnvalue on screen
+	ScoreEvent_SetEventDisplayTypes( "AttritionTitanKilled", GetScoreEvent( "AttritionTitanKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionPilotKilled", GetScoreEvent( "AttritionPilotKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionBossKilled", GetScoreEvent( "AttritionBossKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionGruntKilled", GetScoreEvent( "AttritionGruntKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionSpectreKilled", GetScoreEvent( "AttritionSpectreKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionStalkerKilled", GetScoreEvent( "AttritionStalkerKilled" ).displayType | eEventDisplayType.CENTER )
+	ScoreEvent_SetEventDisplayTypes( "AttritionSuperSpectreKilled", GetScoreEvent( "AttritionSuperSpectreKilled" ).displayType | eEventDisplayType.CENTER )
+
+	// HACK, recover vanilla bad behaviors
 	foreach ( string eventName in AT_ENABLE_SCOREEVENTS )
 		ScoreEvent_Enable( GetScoreEvent( eventName ) )
 
@@ -760,6 +771,13 @@ void function AT_SetPlayerBonusPoints( entity player, int amount )
 
 	player.SetPlayerNetInt( "AT_bonusPoints256", stacks )
 	player.SetPlayerNetInt( "AT_bonusPoints", amount - stacks * 256 )
+
+	// challenge checks
+	if( AT_GetPlayerBonusPoints( player ) >= 600 && !HasPlayerCompletedMeritScore( player ) ) //Challenge is: "Earn $600."
+	{
+		AddPlayerScore( player, "ChallengeATAssault" )
+		SetPlayerChallengeMeritScore( player )
+	}
 }
 
 // total points, the value player actually uploaded to team score

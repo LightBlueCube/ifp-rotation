@@ -67,6 +67,7 @@ void function AiGameModes_SpawnDropShip( vector pos, vector rot, int team, int c
 		thread squadHandler( guys )
 }
 
+
 void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string content /*( ͡° ͜ʖ ͡°)*/, void functionref( array<entity> guys ) squadHandler = null, int droppodFlag = 0 )
 {
 	entity pod = CreateDropPod( pos, <0,0,0> )
@@ -176,7 +177,9 @@ const float REAPER_WARPFALL_DELAY = 4.7 // same as fd does
 void function AiGameModes_SpawnReaper( vector pos, vector rot, int team, string aiSettings = "", void functionref( entity reaper ) reaperHandler = null )
 {
 	float reaperLandTime = REAPER_WARPFALL_DELAY + 1.2 // reaper takes ~1.2s to warpfall
-	thread HotDrop_Spawnpoint( pos, team, reaperLandTime, true, damagedef_reaper_fall )
+	// damageDef parameter has been removed because vanilla doesn't seem to have that behavior
+	//thread HotDrop_Spawnpoint( pos, team, reaperLandTime, false, damagedef_reaper_fall )
+	thread HotDrop_Spawnpoint( pos, team, reaperLandTime, false )
 
 	wait REAPER_WARPFALL_DELAY
 	entity reaper = CreateSuperSpectre( team, pos, rot )
@@ -187,10 +190,15 @@ void function AiGameModes_SpawnReaper( vector pos, vector rot, int team, string 
 	if ( aiSettings != "" )
 		SetSpawnOption_AISettings( reaper, aiSettings )
 
+	reaper.kv.AccuracyMultiplier = 3.0
+	reaper.kv.WeaponProficiency = eWeaponProficiency.PERFECT
+
 	HideName( reaper ) // prevent flash a name onto it
 	reaper.kv.VisibilityFlags = ENTITY_VISIBLE_TO_NOBODY // prevent it's model light shows up
 	DispatchSpawn( reaper )
 	reaper.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE // restore visibility after warpfall starts in spawncallbacks
+	// fake a spawntime to delay replay tracking, hide it's spawn
+	reaper.ai.spawnTime = Time() + 0.5
 
 	// reaper highlight
 	Highlight_SetFriendlyHighlight( reaper, "sp_friendly_pilot" )
@@ -207,7 +215,9 @@ void function AiGameModes_SpawnReaper( vector pos, vector rot, int team, string 
 }
 
 // copied from cl_replacement_titan_hud.gnut
-void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, bool hasFriendlyWarning = false, int damageDef = -1 )
+// damageDef parameter has been removed because vanilla doesn't seem to have that behavior
+//void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, bool hasFriendlyWarning = false, int damageDef = -1 )
+void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, bool hasFriendlyWarning = false )
 {
 	array<entity> targetEffects = []
 	vector surfaceNormal = < 0, 0, 1 >
@@ -232,6 +242,8 @@ void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, boo
 	targetEffects.append( effectEnemy )
 
 	// so enemy npcs will mostly avoid them
+	// welp, vanilla attrition doesn't seem to have such behavior
+	/*
 	entity damageAreaInfo
 	if ( damageDef > -1 )
 	{
@@ -240,6 +252,7 @@ void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, boo
 		damageAreaInfo.SetOrigin( origin )
 		AI_CreateDangerousArea_DamageDef( damageDef, damageAreaInfo, team, true, true )
 	}
+	*/
 
 	wait impactTime
 
@@ -249,8 +262,10 @@ void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, boo
 		if ( IsValid( targetEffect ) )
 			EffectStop( targetEffect )
 	}
+	/*
 	if ( IsValid( damageAreaInfo ) )
 		damageAreaInfo.Destroy()
+	*/
 }
 
 
@@ -259,7 +274,9 @@ const float TITAN_WARPFALL_DELAY = 2.5 // warpfall sound + fx + animation lasts 
 // including aisettings stuff specifically for at bounty titans
 void function AiGameModes_SpawnTitan( vector pos, vector rot, int team, string setFile, string aiSettings = "", void functionref( entity titan ) titanHandler = null )
 {
-	thread HotDrop_Spawnpoint( pos, team, TITANFALL_WARNING_DURATION, false, damagedef_titan_fall )
+	// damageDef parameter has been removed because vanilla doesn't seem to have that behavior
+	//thread HotDrop_Spawnpoint( pos, team, TITANFALL_WARNING_DURATION, false, damagedef_titan_fall )
+	thread HotDrop_Spawnpoint( pos, team, TITANFALL_WARNING_DURATION, false )
 
 	// warpfall variant
 	if ( Flag( "LevelHasRoof" ) )
@@ -291,7 +308,7 @@ void function AiGameModes_SpawnTitan( vector pos, vector rot, int team, string s
 
 void function SetUpNPCWeapons( entity guy )
 {
-	guy.kv.AccuracyMultiplier = 100.0
+	guy.kv.AccuracyMultiplier = 3.0
 	guy.kv.WeaponProficiency = eWeaponProficiency.PERFECT
 
 	string className = guy.GetClassName()

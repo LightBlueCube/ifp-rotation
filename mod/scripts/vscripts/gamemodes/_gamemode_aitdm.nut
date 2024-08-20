@@ -3,31 +3,48 @@ global function GamemodeAITdm_Init
 
 
 // these are now default settings
-const int SQUADS_PER_TEAM = 3 // was 3, vanilla seems to have 4 squads
+const int SQUADS_PER_TEAM = 4 // was 3, vanilla seems to have 4 squads
 
-const int REAPERS_PER_TEAM = 2 // was 2, vanilla seems to have 3 reapers
+const int REAPERS_PER_TEAM = 3 // was 2, vanilla seems to have 3 reapers
+
+const int LEVEL_SPECTRES = 125
+const int LEVEL_STALKERS = 380
+const int LEVEL_REAPERS = 500
 
 // modified... really should add settings for these settings
 global function AITdm_SetSquadsPerTeam
 global function AITdm_SetReapersPerTeam
+global function AITdm_SetLevelSpectres
+global function AITdm_SetLevelStalkers
+global function AITdm_SetLevelReapers
 global function SpawnIntroBatch_Threaded
 
 struct
 {
 	// Due to team based escalation everything is an array
+	array< int > levels = [] //[ LEVEL_SPECTRES, LEVEL_SPECTRES ] // modified, since we added modification should leave these to the start of spawner
 	array< array< string > > podEntities = [ [ "npc_soldier", "npc_spectre", "npc_stalker" ], [ "npc_soldier", "npc_spectre", "npc_stalker" ] ]
 	array< bool > reapers = [ true, true ]
 
 	// modified... really should add settings for these
 	int squadsPerTeam = SQUADS_PER_TEAM // default
 	int reapersPerTeam = REAPERS_PER_TEAM
+	int levelSpectres = LEVEL_SPECTRES
+	int levelStalkers = LEVEL_STALKERS
+	int levelReapers = LEVEL_REAPERS
 } file
 
 void function GamemodeAITdm_Init()
 {
-	SetSpawnpointGamemodeOverride( ATTRITION ) // use bounty hunt spawns as vanilla game has no spawns explicitly defined for aitdm
+	// you can't be serious. gamemode_tdm spawns are for AITdm
+	//SetSpawnpointGamemodeOverride( ATTRITION ) // use bounty hunt spawns as vanilla game has no spawns explicitly defined for aitdm
+
+	// northstar have bad return value with GetSpawnpointGamemodeOverride()
+	// needs this to make things like dropship intro to work properly
+	SetSpawnpointGamemodeOverride( TEAM_DEATHMATCH )
 
 	AddCallback_GameStateEnter( eGameState.Prematch, OnPrematchStart )
+	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
 
 	AddCallback_OnNPCKilled( HandleScoreEvent )
 	AddCallback_OnPlayerKilled( HandleScoreEvent )
@@ -61,6 +78,9 @@ void function GamemodeAITdm_Init()
 	// tempfix specifics
 	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
+
+	// challenge fix
+	SetupGenericTDMChallenge()
 }
 
 void function OnLastMinute()
@@ -86,6 +106,21 @@ void function AITdm_SetReapersPerTeam( int reapers )
 	file.reapersPerTeam = reapers
 }
 
+void function AITdm_SetLevelSpectres( int level )
+{
+	file.levelSpectres = level
+}
+
+void function AITdm_SetLevelStalkers( int level )
+{
+	file.levelStalkers = level
+}
+
+void function AITdm_SetLevelReapers( int level )
+{
+	file.levelReapers = level
+}
+
 void function OnPrematchStart()
 {
 	// don't run spawning code if ains and nms aren't up to date
@@ -98,6 +133,11 @@ void function OnPrematchStart()
 	// Starts skyshow, this also requiers AINs but doesn't crash if they're missing
 	if ( !Flag( "LevelHasRoof" ) )
 		thread StratonHornetDogfightsIntense()
+}
+
+void function OnPlaying()
+{
+
 }
 
 // Sets up mode specific hud on client
@@ -157,15 +197,23 @@ bool function AttackerIsValidForAITdmScore( entity victim, entity attacker, var 
 	// Basic checks
 	if ( !IsValid( attacker ) )
 		return false
+
+	// Team filter
+	if ( victim.GetTeam() == attacker.GetTeam() )
+		return false
+
+	// gamestate, attacker class and selfdamage checks
 	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsNPC() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
+		return false
+	// NPC titans without an owner player will not count towards any team's score
+	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
 		return false
 
 	// Hacked spectre and pet titan filter
-	if ( victim.GetOwner() == attacker || victim.GetBossPlayer() == attacker )
-		return false
-
-	// NPC titans without an owner player will not count towards any team's score
-	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
+	// ( though hacked spectres already handled by npc.s.givenAttritionScore )
+	// owner should be related with visibility stuffs( like synced melee ), not adding to this check
+	//if ( victim.GetOwner() == attacker || victim.GetBossPlayer() == attacker )
+	if ( victim.GetBossPlayer() == attacker )
 		return false
 
 	// all checks passed
@@ -175,6 +223,8 @@ bool function AttackerIsValidForAITdmScore( entity victim, entity attacker, var 
 bool function VictimIsValidForAITdmScore( entity victim )
 {
 	// if victim is a non-titan npc that owned by players, don't add score
+	// vanilla doesn't seem to have this check, and we've added npc.s.givenAttritionScore for hacked spectres
+	/*
 	if ( victim.IsNPC() && !victim.IsTitan() )
 	{
 		entity bossPlayer = victim.GetBossPlayer()
@@ -190,6 +240,10 @@ bool function VictimIsValidForAITdmScore( entity victim )
 				return false
 		}
 	}
+	*/
+	// check whether this npc has given score or not
+	if ( "givenAttritionScore" in victim.s )
+		return false
 
 	// all checks passed
 	return true
@@ -202,7 +256,47 @@ void function AddAITdmPlayerTeamScore( entity player, int score )
 	if( player.IsNPC() )
 		return
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, score )
-	player.SetPlayerNetInt( "AT_bonusPoints", player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+	AITdm_SetPlayerBonusPoints( player, player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+}
+
+// networkvar updates
+void function AITdm_AddPlayerBonusPoints( entity player, int amount )
+{
+	AITdm_SetPlayerBonusPoints( player, AITdm_GetPlayerBonusPoints( player ) + amount )
+}
+
+int function AITdm_GetPlayerBonusPoints( entity player )
+{
+	return player.GetPlayerNetInt( "AT_bonusPoints" ) + ( player.GetPlayerNetInt( "AT_bonusPoints256" ) * 256 )
+}
+
+void function AITdm_SetPlayerBonusPoints( entity player, int amount )
+{
+	// split into stacks of 256 where necessary
+	int stacks = amount / 256 // automatically rounds down because int division
+
+	player.SetPlayerNetInt( "AT_bonusPoints256", stacks )
+	player.SetPlayerNetInt( "AT_bonusPoints", amount - stacks * 256 )
+}
+
+// earn points, seems not used
+void function AITdm_AddPlayerEarnedPoints( entity player, int amount )
+{
+	AITdm_SetPlayerEarnedPoints( player, AITdm_GetPlayerEarnedPoints( player ) + amount )
+}
+
+int function AITdm_GetPlayerEarnedPoints( entity player )
+{
+	return player.GetPlayerNetInt( "AT_earnedPoints" ) + ( player.GetPlayerNetInt( "AT_earnedPoints256" ) * 256 )
+}
+
+void function AITdm_SetPlayerEarnedPoints( entity player, int amount )
+{
+	// split into stacks of 256 where necessary
+	int stacks = amount / 256 // automatically rounds down because int division
+
+	player.SetPlayerNetInt( "AT_earnedPoints256", stacks )
+	player.SetPlayerNetInt( "AT_earnedPoints", amount - stacks * 256 )
 }
 
 // When attrition starts both teams spawn ai on preset nodes, after that
@@ -302,7 +396,9 @@ void function SpawnIntroBatch_Threaded( int team )
 		}
 
 		// Vanilla has a delay after first spawn
-		if ( first )
+		// modified here: delay is applied after half spawn
+		//if ( first )
+		if ( i == ( file.squadsPerTeam / 2 ) - 1 )
 			wait 2
 
 		first = false
@@ -323,10 +419,14 @@ void function Spawner_Threaded( int team )
 	// used to index into escalation arrays
 	int index = team == TEAM_MILITIA ? 0 : 1
 
+	file.levels = [ file.levelSpectres, file.levelSpectres ] // due we added settings, should init levels here!
+
 	// handle prematch spawns
 	while( GetGameState() == eGameState.Prematch || GetGameState() == eGameState.Playing )
 	{
 		WaitFrame() // wait a frame each loop
+
+		//Escalate( team )
 
 		// TODO: this should possibly not count scripted npc spawns, probably only the ones spawned by this script
 		int infantryCount = 0
@@ -392,6 +492,43 @@ void function Spawner_Threaded( int team )
 	}
 }
 
+// Based on points tries to balance match
+void function Escalate( int team )
+{
+	int score = GameRules_GetTeamScore( team )
+	int index = team == TEAM_MILITIA ? 1 : 0
+	// This does the "Enemy x incoming" text
+	string defcon = team == TEAM_MILITIA ? "IMCdefcon" : "MILdefcon"
+
+	// Return if the team is under score threshold to escalate
+	if ( score < file.levels[ index ] || file.reapers[ index ] )
+		return
+
+	// Based on score escalate a team
+	switch ( file.levels[ index ] )
+	{
+		case file.levelSpectres:
+			file.levels[ index ] = file.levelStalkers
+			file.podEntities[ index ].append( "npc_spectre" )
+			SetGlobalNetInt( defcon, 2 )
+			return
+
+		case file.levelStalkers:
+			file.levels[ index ] = file.levelReapers
+			file.podEntities[ index ].append( "npc_stalker" )
+			SetGlobalNetInt( defcon, 3 )
+			return
+
+		case file.levelReapers:
+			file.reapers[ index ] = true
+			SetGlobalNetInt( defcon, 4 )
+			return
+	}
+
+	// why we have to run into unreachable?
+	//unreachable // hopefully
+}
+
 
 // Decides where to spawn ai
 // Each team has their "zone" where they and their ai spawns
@@ -428,6 +565,14 @@ bool function IsValidNPCAssaultTarget( entity ent )
 
 	// is invulnerable?
 	if ( ent.IsInvulnerable() )
+		return false
+
+	// been cloaked?
+	if ( IsCloaked( ent ) )
+		return false
+
+	// doing phase shift?
+	if ( ent.IsPhaseShifted() )
 		return false
 
 	// npc
@@ -588,6 +733,18 @@ void function SquadHandler( array<entity> guys )
 // can't name it "OnNPCLeeched()" because there's a deprecated function with same name... and it's globalized. yay.
 void function AITdm_OnNPCLeeched( entity npc, entity player )
 {
+	// Set Owner so we can filter in HandleScore
+	// not a good idea. score could be handled by GetBossPlayer()
+	// setting an owner will make entity have no collision with their owner
+	//npc.SetOwner( player )
+	// wait what???? in vanilla you CAN kill your leeched npcs
+	// that's quiet more funnier than you can hack them multiple times
+	//npc.ai.preventOwnerDamage = true // this is required so we don't kill our spectres
+
+	// adding score
+	// they can be re-hacked and we need to prevent gain score multiple times
+	//if ( !( "givenAttritionScore" in npc.s ) )
+	//{
 	int playerScore = 0
 	switch ( npc.GetClassName() )
 	{
@@ -605,6 +762,13 @@ void function AITdm_OnNPCLeeched( entity npc, entity player )
 	}
 	// Add score + update network int to trigger the "Score +n" popup
 	AddAITdmPlayerTeamScore( player, playerScore )
+	//	npc.s.givenAttritionScore <- true // mark the npc as already given score to player
+	//}
+
+	// disable leech on this spectre, don't let them to be multiple-leeched by diffrent team...
+	// reverted. it is vanilla behavior! and it's pretty funny
+	//DisableLeeching( npc )
+	//npc.UnsetUsable()
 }
 
 // Same as SquadHandler, just for reapers

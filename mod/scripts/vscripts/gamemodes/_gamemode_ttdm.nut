@@ -40,9 +40,10 @@ void function OnPlayerRespawned_Threaded( entity player )
 {
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "OnDeath" )
-	WaitFrame()
-	CreateBubbleShield( player, player.GetOrigin(), player.GetAngles() )
 	DeployAndEnableWeapons( player )
+	if( !player.IsTitan() )
+		return
+	CreateBubbleShield( player, player.GetOrigin(), player.GetAngles() )
 }
 
 void function OnLastMinute()
@@ -79,7 +80,7 @@ void function TTDMIntroSetup()
 	//AddCallback_OnClientConnected( TTDMIntroShowIntermissionCam )
 	// vanilla behavior...
 	AddCallback_GameStateEnter( eGameState.Playing, TTDMGameStart )
-AddCallback_OnClientConnected( TTDMIntroConntectedPlayer )
+	AddCallback_OnClientConnected( TTDMIntroConntectedPlayer )
 }
 
 void function TTDMIntroStart()

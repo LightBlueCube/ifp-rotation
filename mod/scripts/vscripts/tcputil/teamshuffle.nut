@@ -162,7 +162,7 @@ void function GameStateEnter_Postmatch()
 void function ShuffleTeams_Waiting()
 {
 	svGlobal.levelEnt.WaitSignal( "PostmatchVoteOver" )
-	wait 4
+	wait GAME_POSTMATCH_LENGTH -1
 	file.hasShuffled = false
 	TeamShuffleThink()
 }

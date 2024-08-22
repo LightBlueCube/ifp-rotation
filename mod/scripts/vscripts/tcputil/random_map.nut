@@ -48,44 +48,11 @@ void function RandomMap_Init()
 		return
 	}
 	AddCallback_SetCustomPostMatchLength( VoteForGamemode )
-
-	AddChatCommandCallback( "!v", GetVote )
-	AddChatCommandCallback( "!V", GetVote )
-	AddChatCommandCallback( "！v", GetVote )
-	AddChatCommandCallback( "！V", GetVote )
 }
 
 void function ShowCustomTextOnPostmatch( string text )
 {
 	file.customText = text
-}
-
-bool function GetVote( entity player, array<string> args )
-{
-	if( !voteStatus )
-		return false
-	if( args.len() != 1 )
-	{
-		Chat_ServerPrivateMessage( player, "\x1b[31m错误的指令参数或为空参数！", false, false )
-		return true
-	}
-	int id = args[0].tointeger()
-	id -= 1
-	if( id < 0 || id > options.len() )
-	{
-		Chat_ServerPrivateMessage( player, "\x1b[31m错误的投票选项！", false, false )
-		return true
-	}
-	if( hasVotedPlayers.contains( player.GetUID() ) )
-	{
-		Chat_ServerPrivateMessage( player, "\x1b[31m你已经投过票了！", false, false )
-		return true
-	}
-
-	vote[id] += 1
-	Chat_ServerPrivateMessage( player, "\x1b[36m你投票给了 "+ GetModeName( options[id] ), false, false )
-	hasVotedPlayers.append( player.GetUID() )
-	return true
 }
 
 array<string> options = [ "aitdm", "ps", "at", "cp", "fw", "ttdm", "ctf", "mfd" ]
@@ -97,16 +64,18 @@ void function VoteForGamemode()
 {
 	// start vote
 	voteStatus = true
-	float endTime = Time() + 20
+	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
+	float endTime = Time() + 13
 	while( Time() < endTime )
 	{
 		string text = ""
 		int total = 0
 		bool skip = false
 		for( int i = 0; i < options.len(); i++ )
-		{
 			total += vote[i]
-			if( total == GetPlayerArray().len() || vote[i] > float( GetPlayerArray().len() ) / 2 )
+		for( int i = 0; i < options.len(); i++ )
+		{
+			if( total == GetPlayerArray().len() || vote[i] >= float( GetPlayerArray().len() ) - total / 2 )
 			{
 				skip = true
 				break
@@ -115,7 +84,7 @@ void function VoteForGamemode()
 			text += i + 1 +": "+ GetModeName( options[i] ) +" ("+ vote[i] +"票)\n"
 		}
 		foreach( entity player in GetPlayerArray() )
-			SendHudMessageWithPriority( player, 102, "聊天栏输入 !v 数字\n来进行投票选择下一局的游戏模式\n注意是 !v 数字 不是 !v数字\n"+ text +"剩余时间:"+ int( endTime - Time() ) +"s", -1, 0.3, < 200, 200, 255 >, < 0.0, 0.2, 0 > )
+			SendHudMessageWithPriority( player, 102, "选择下一局的游戏模式\n聊天栏输入模式名前的数字来进行投票\n注意只输入数字就可以了别的不要加\n\n"+ text +"剩余时间:"+ int( endTime - Time() ) +"s", -1, 0.3, < 200, 200, 255 >, < 0.0, 0.2, 0 > )
 		if( skip )
 			break
 		WaitFrame()
@@ -137,7 +106,30 @@ void function VoteForGamemode()
 	}
 
 	svGlobal.levelEnt.Signal( "PostmatchVoteOver" )
+	voteStatus = false
 	RandomGameMode( allowlist )
+}
+
+ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msgStruct )
+{
+	string message = msgStruct.message
+	entity player = msgStruct.player
+
+	int id = message.tointeger()
+	id -= 1
+	if( id < 0 || id >= options.len() )
+		return msgStruct
+
+	if( hasVotedPlayers.contains( player.GetUID() ) )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m你已经投过票了！", false, false )
+		return msgStruct
+	}
+
+	vote[id] += 1
+	Chat_ServerPrivateMessage( player, "\x1b[36m你投票给了 "+ GetModeName( options[id] ), false, false )
+	hasVotedPlayers.append( player.GetUID() )
+	return msgStruct
 }
 
 void function RandomGameMode( array<string> allowlist = [] )
@@ -204,7 +196,7 @@ void function RandomMap( string mode )
 	foreach( player in GetPlayerArray() )
 		SendHudMessageWithPriority( player, 102, "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
 
-	wait 5
+	wait GAME_POSTMATCH_LENGTH
 	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
 	StoreStringArrayIntoConVar( file.modePlaylist, "random_mode_playlist" )
 	RandomGamemode_SetPlaylistVarOverride( mode )
@@ -241,7 +233,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 	}
 
 	cp = {
-		scorelimit = "2147483647"
+		scorelimit = "8000"
 		timelimit = "16"
 	}
 

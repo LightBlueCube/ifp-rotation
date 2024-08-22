@@ -2189,7 +2189,7 @@ const float HAVESTER_NUKE_DAMAGE_FRAC = 0.2 // for nuke titans. normally player 
 const float HAVESTER_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float HARVESTER_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 
-float damageConstraint = 8000
+float damageConstraint = 15000
 
 void function HarvesterDamageModifier( entity harvester, var damageInfo )
 {
@@ -2209,7 +2209,6 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case damagedef_nuclear_core:
 			float damage = DamageInfo_GetDamage( damageInfo )
 			float frac = ( damageConstraint * 0.5 ) / ( damage * HAVESTER_NUKE_DAMAGE_FRAC )
-			printt( DamageInfo_GetDamage( damageInfo ) * 0.2 +"\n"+ damageConstraint * 0.5 +"\n"+ frac )
 			if( frac > 1 )
 				frac = 1
 			DamageInfo_ScaleDamage( damageInfo, HAVESTER_NUKE_DAMAGE_FRAC * frac )
@@ -2228,8 +2227,10 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 
 		// kill streak
 		case eDamageSourceId.mp_weapon_cruise_missile:
-		case eDamageSourceId.mp_weapon_scp018:
 			DamageInfo_ScaleDamage( damageInfo, 0.25 )
+			break
+		case eDamageSourceId.mp_weapon_scp018:
+			DamageInfo_ScaleDamage( damageInfo, 0.5 )
 			break
 
 		// lockon damage

@@ -783,6 +783,16 @@ void function KillPlayerOnGround( var ent )
 	entity player = expect entity( ent )
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
+
+	string setFile = player.GetPlayerSettings()
+	array<string> settingMods = player.GetPlayerSettingsMods()
+	if( !settingMods.contains( "disable_wallrun" ) )
+		settingMods.append( "disable_wallrun" )
+	if( !settingMods.contains( "disable_doublejump" ) )
+		settingMods.append( "disable_doublejump" )
+
+	player.SetPlayerSettingsWithMods( setFile, settingMods )
+
 	for( ;; )
 	{
 		WaitFrame()

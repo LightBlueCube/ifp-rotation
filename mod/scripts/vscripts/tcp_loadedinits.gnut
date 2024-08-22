@@ -75,18 +75,10 @@ void function LoadedInits_Init()
 	// override killstreak data!
 	SetKillStreakData({
 		nukeTitan = 5
-		cruiseMissile = 12
-		vtol = 10
-		orbitalStrike = 8
-		scp018 = 11
+		cruiseMissile = 11
+		vtol = 14
+		orbitalStrike = 7
+		scp018 = 8
 		nuclearBomb = 20
 	})
-	SetRandomKillStreakFunction( RandomKillStreakFunc )
-}
-
-void function RandomKillStreakFunc( entity player )
-{
-	player.s.NukeTitan += RandomInt( 4 )
-	if( player.s.NukeTitan <= 0 )
-		player.s.CruiseMissile += 1
 }

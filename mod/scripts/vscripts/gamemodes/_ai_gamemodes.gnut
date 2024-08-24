@@ -116,11 +116,7 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 void function GiveNPCBattery( entity npc )
 {
 	entity battery = Rodeo_CreateBatteryPack()
-	int random = RandomInt( 10 )
-	if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
-	{
-		battery.SetSkin( 2 )
-	}
+	battery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
 	Battery_StartFX( battery )
 	battery.SetParent( npc, "BATTERY_ATTACH" )
 	battery.MarkAsNonMovingAttachment()

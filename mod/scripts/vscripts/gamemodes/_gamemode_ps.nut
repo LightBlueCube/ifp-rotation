@@ -38,6 +38,9 @@ void function GamemodePs_Init()
 
 	// challenge fix
 	SetupGenericFFAChallenge()
+
+	// modify override earnmeter setting
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
 }
 
 void function OnLastMinute()
@@ -55,7 +58,7 @@ void function OnLastMinute()
 void function OnPlayerRespawned( entity player )
 {
 	entity battery = Rodeo_CreateBatteryPack()
-	battery.SetSkin( RandomInt( 10 ) == 0 ? 0 : 2 )	// 90% Yellow, 10% Green
+	battery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
 	Battery_StartFX( battery )
 	Rodeo_OnTouchBatteryPack_Internal( player, battery )
 }

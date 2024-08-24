@@ -57,21 +57,19 @@ void function GamemodeAITdm_Init()
 	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_defender", "mp_weapon_mgl" ] )
 
-	//use modded settings!
-	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
+	ScoreEvent_SetupEarnMeterValuesForMixedModes()
+
+	// modify override settings
+	// player-controlled stuff
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.35 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
 
 	AddCallback_OnLastMinute( OnLastMinute )
 

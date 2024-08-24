@@ -238,6 +238,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 	}
 
 	fw = {
+		enable_spectre_hacking = "0"
 		scorelimit = "100"
 		timelimit = "16"
 	}
@@ -249,7 +250,6 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 	}
 
 	ctf = {
-		earn_meter_pilot_multiplier = "2"
 		respawn_delay = "0"
 		scorelimit = "5"
 		timelimit = "10"

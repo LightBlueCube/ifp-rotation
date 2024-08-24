@@ -71,6 +71,11 @@ void function SetUpTTDMScoreEvents()
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "TitanAssist", 0.0, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "Execution", 0.0, 0.0 )
+
+	// modify override settings
+	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
 }
 
 void function TTDMIntroSetup()

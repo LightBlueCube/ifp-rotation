@@ -69,8 +69,8 @@ void function LoadedInits_Init()
 	AutoShutdown_Init()
 
 	// DEV: 跟踪泰坦使用频次和记录各泰坦的kd，在rotation中我们只记录这几个模式的泰坦数据
-	if( [ "aitdm", "cp" ].contains( GameRules_GetGameMode() ) )
-		DevTrackUsage_Init()	//DEV: 跟踪泰坦使用频次和记录各泰坦的kd
+	//if( [ "aitdm", "cp" ].contains( GameRules_GetGameMode() ) )
+	//	DevTrackUsage_Init()	//DEV: 跟踪泰坦使用频次和记录各泰坦的kd
 
 	// override killstreak data!
 	SetKillStreakData({

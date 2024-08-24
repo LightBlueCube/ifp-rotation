@@ -77,22 +77,6 @@ void function OnWinnerDetermined()
 
 void function CTFScoreEventSetUp()
 {
-	//use modded settings!
-	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.35 )
-
-	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 0.2 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
-
 	// override settings
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10 )
 	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.10, 0.10 )
@@ -103,6 +87,18 @@ void function CTFScoreEventSetUp()
 	ScoreEvent_SetEarnMeterValues( "FlagCapture", 0.15, 0.15 )
 	ScoreEvent_SetEarnMeterValues( "FlagCaptureAssist", 0.1, 0.1, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "FlagReturn", 0.1, 0.1 )
+
+	// modify override settings
+	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
+
+	// ai
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
 
 	// display type
 	// default case is adding a eEventDisplayType.CENTER, required for client to show earnvalue on screen

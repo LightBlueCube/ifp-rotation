@@ -61,6 +61,14 @@ void function OnPlayerRespawned( entity player )
 	battery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
 	Battery_StartFX( battery )
 	Rodeo_OnTouchBatteryPack_Internal( player, battery )
+	thread OnPlayerRespawned_Threaded( player )
+}
+
+void function OnPlayerRespawned_Threaded( entity player )
+{
+	WaitFrame()
+	if ( IsValid( player ) )
+		PlayerEarnMeter_SetMode( player, eEarnMeterMode.DISABLED )
 }
 
 // northstar missing

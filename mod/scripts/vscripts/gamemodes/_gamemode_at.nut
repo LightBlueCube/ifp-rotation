@@ -112,6 +112,7 @@ void function GamemodeAt_Init()
 	RegisterSignal( "ATAllCampsClean" )
 
 	// Set-up score callbacks
+	ScoreEvent_SetupEarnMeterValuesForMixedModes()
 	AT_ScoreEventsValueSetUp()
 	AddCallback_OnPlayerKilled( AT_PlayerOrNPCKilledScoreEvent )
 	AddCallback_OnNPCKilled( AT_PlayerOrNPCKilledScoreEvent )

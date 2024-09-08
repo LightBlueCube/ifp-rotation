@@ -74,6 +74,10 @@ function TitanShared_Init()
 
 		PrecacheModel( $"models/industrial/bolt_tiny01.mdl" )
 	#endif
+
+	// tcp modify
+	RegisterWeaponDamageSource( "mp_killstreak_nuketitan", "核能彈射" )
+	RegisterWeaponDamageSource( "mp_killstreak_orbitalstrike", "軌道打擊" )
 }
 
 #if SERVER
@@ -1057,6 +1061,45 @@ function NuclearCoreExplosionChainReaction( vector origin, e )
 
 		if ( outerRadius < innerRadius )
 			outerRadius = innerRadius
+
+		if( "NukeTitanKillStreak" in e.titan.s )
+		{
+			RadiusDamage(
+				origin,										// center
+				explosionOwner,								// attacker
+				inflictor,									// inflictor
+				normalDamage,								// damage
+				heavyArmorDamage,							// damageHeavyArmor
+				innerRadius,								// innerRadius
+				outerRadius,								// outerRadius
+				0,											// flags
+				0,											// distanceFromAttacker
+				0,											// explosionForce
+				DF_RAGDOLL | DF_EXPLOSION,					// scriptDamageFlags
+				eDamageSourceId.mp_killstreak_nuketitan )	// scriptDamageSourceIdentifier
+
+			wait waitPerExplosion
+			continue
+		}
+		else if( "OrbitalStrikeKillStreak" in e.titan.s )
+		{
+			RadiusDamage(
+				origin,										// center
+				explosionOwner,								// attacker
+				inflictor,									// inflictor
+				normalDamage,								// damage
+				heavyArmorDamage,							// damageHeavyArmor
+				innerRadius,								// innerRadius
+				outerRadius,								// outerRadius
+				0,											// flags
+				0,											// distanceFromAttacker
+				0,											// explosionForce
+				DF_RAGDOLL | DF_EXPLOSION,					// scriptDamageFlags
+				eDamageSourceId.mp_killstreak_orbitalstrike )	// scriptDamageSourceIdentifier
+
+			wait waitPerExplosion
+			continue
+		}
 
 		RadiusDamage_DamageDef( damagedef_nuclear_core,
 			origin,								// origin

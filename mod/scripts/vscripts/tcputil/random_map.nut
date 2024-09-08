@@ -65,7 +65,7 @@ void function VoteForGamemode()
 	// start vote
 	voteStatus = true
 	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
-	float endTime = Time() + 13
+	float endTime = Time() + 16
 	while( Time() < endTime )
 	{
 		string text = ""
@@ -75,7 +75,7 @@ void function VoteForGamemode()
 			total += vote[i]
 		for( int i = 0; i < options.len(); i++ )
 		{
-			if( total == GetPlayerArray().len() || vote[i] >= float( GetPlayerArray().len() ) - total / 2 )
+			if( total == GetPlayerArray().len() || vote[i] >= GetPlayerArray().len() - total )
 			{
 				skip = true
 				break
@@ -193,8 +193,11 @@ void function RandomMap( string mode )
 	}
 
 	string map = file.mapPlaylist[i]
+	string modetips = "\n"
+	if( mode == "ttdm" )
+		modetips = "注意！连杀系统将在ttdm关闭\n撤离成功获得的连杀将延迟到下一对局交付"
 	foreach( player in GetPlayerArray() )
-		SendHudMessageWithPriority( player, 102, "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
+		SendHudMessageWithPriority( player, 102, "下一局模式为："+ GetModeName( mode ) +"\n下一局地图为："+ GetMapTitleName( map ) +"\n"+ modetips +"\n\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
 
 	wait GAME_POSTMATCH_LENGTH
 	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
@@ -218,46 +221,46 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	aitdm = {
 		scorelimit = "2147483647"
-		timelimit = "16"
+		timelimit = "12"
 	}
 
 	ps = {
 		scorelimit = "2147483647"
-		timelimit = "16"
+		timelimit = "12"
 	}
 
 	at = {
 		enable_spectre_hacking = "0"
 		scorelimit = "10000"
-		timelimit = "16"
+		timelimit = "12"
 	}
 
 	cp = {
 		scorelimit = "8000"
-		timelimit = "16"
+		timelimit = "12"
 	}
 
 	fw = {
 		enable_spectre_hacking = "0"
 		scorelimit = "100"
-		timelimit = "16"
+		timelimit = "12"
 	}
 
 	ttdm = {
 		respawn_delay = "0"
 		scorelimit = "2147483647"
-		timelimit = "10"
+		timelimit = "12"
 	}
 
 	ctf = {
 		respawn_delay = "0"
 		scorelimit = "5"
-		timelimit = "10"
+		timelimit = "12"
 	}
 
 	mfd = {
 		scorelimit = "16"
-		timelimit = "10"
+		timelimit = "12"
 	}
 }
 

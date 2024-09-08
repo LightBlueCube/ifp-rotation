@@ -45,6 +45,7 @@ void function CaptureTheFlag_Init()
 
 	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender" ] )
 	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
@@ -63,11 +64,20 @@ void function CaptureTheFlag_Init()
 	level.teamFlags <- {}
 
 	// setup score event earnmeter values
+	ScoreEvent_SetupEarnMeterValuesForMixedModes()
 	CTFScoreEventSetUp()
 
 	// tempfix specifics
 	SetShouldPlayDefaultMusic( true ) // play music when score or time reaches some point
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	entity battery = Rodeo_CreateBatteryPack()
+	battery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
+	Battery_StartFX( battery )
+	Rodeo_OnTouchBatteryPack_Internal( player, battery )
 }
 
 void function OnWinnerDetermined()
@@ -116,14 +126,58 @@ void function OnLastMinute()
 		if( !IsValid( player ) )
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
+	}
 
-		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
-			continue
+	thread StartGlobalHighlight()
+}
 
-		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )
+array<string> HighlightPlayers = []
+
+void function StartGlobalHighlight()
+{
+	for( ;; )
+	{
+		if( GetGameState() != eGameState.Playing )
+			return
+		foreach( player in GetPlayerArray() )
+		{
+			if( !IsAlive( player ) )
+				continue
+			if( HighlightPlayers.contains( player.GetUID() ) )
+				continue
+			thread GlobalHighlightThink( player )
+		}
+
+		WaitFrame()
 	}
 }
 
+void function GlobalHighlightThink( entity player )
+{
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+
+	string uid = player.GetUID()
+	int statusEffectHandle = StatusEffect_AddEndless( player, eStatusEffect.sonar_detected, 1.0 )
+
+	OnThreadEnd(
+		function() : ( player, uid, statusEffectHandle )
+		{
+			HighlightPlayers.removebyvalue( uid )
+			if( !IsValid( player ) )
+				return
+			player.Signal( "MarkLaserHudMsgStop" )
+			Highlight_ClearEnemyHighlight( player )
+			StatusEffect_Stop( player, statusEffectHandle )
+		}
+	)
+
+	HighlightPlayers.append( uid )
+	Highlight_ClearEnemyHighlight( player )
+	Highlight_SetSonarHighlightWithParam0( player, "enemy_sonar", <1, 0, 0> )
+	while( GetGameState() == eGameState.Playing )
+		wait 1
+}
 
 void function RateSpawnpoints_CTF( int checkClass, array<entity> spawnpoints, int team, entity player )
 {

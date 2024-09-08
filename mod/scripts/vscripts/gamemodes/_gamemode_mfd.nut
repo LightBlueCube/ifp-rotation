@@ -41,6 +41,15 @@ void function GamemodeMfd_Init()
 	AddCallback_GameStateEnter( eGameState.Playing, CreateInitialMarks )
 
 	AddCallback_OnLastMinute( OnLastMinute )
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	entity battery = Rodeo_CreateBatteryPack()
+	battery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
+	Battery_StartFX( battery )
+	Rodeo_OnTouchBatteryPack_Internal( player, battery )
 }
 
 void function OnLastMinute()
@@ -50,13 +59,58 @@ void function OnLastMinute()
 		if( !IsValid( player ) )
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
+	}
 
+	thread StartGlobalHighlight()
+}
+
+array<string> HighlightPlayers = []
+
+void function StartGlobalHighlight()
+{
+	for( ;; )
+	{
+		if( GetGameState() != eGameState.Playing )
+			return
 		foreach( player in GetPlayerArray() )
 		{
-			Highlight_ClearEnemyHighlight( player )
-			Highlight_SetSonarHighlightWithParam0( player, "enemy_sonar", <1, 0, 0> )
+			if( !IsAlive( player ) )
+				continue
+			if( HighlightPlayers.contains( player.GetUID() ) )
+				continue
+			thread GlobalHighlightThink( player )
 		}
+
+		WaitFrame()
 	}
+}
+
+void function GlobalHighlightThink( entity player )
+{
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+
+	string uid = player.GetUID()
+	int statusEffectHandle = StatusEffect_AddEndless( player, eStatusEffect.sonar_detected, 1.0 )
+
+	OnThreadEnd(
+		function() : ( player, uid, statusEffectHandle )
+		{
+			HighlightPlayers.removebyvalue( uid )
+			if( !IsValid( player ) )
+				return
+			player.Signal( "MarkLaserHudMsgStop" )
+			Highlight_ClearEnemyHighlight( player )
+			StatusEffect_Stop( player, statusEffectHandle )
+		}
+	)
+
+	printt( "marklaserworkforplayer"+ player )
+	HighlightPlayers.append( uid )
+	Highlight_ClearEnemyHighlight( player )
+	Highlight_SetSonarHighlightWithParam0( player, "enemy_sonar", <1, 0, 0> )
+	while( GetGameState() == eGameState.Playing )
+		wait 1
 }
 
 void function SetupMFDPlayer( entity player )

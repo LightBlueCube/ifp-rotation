@@ -142,7 +142,6 @@ void function GamemodeFW_Init()
 {
 	// _battery_port.gnut needs this
 	RegisterSignal( "BatteryActivate" )
-	RegisterSignal( "DamageConstraint" )
 
 	if( GetMapName() == "mp_thaw" )	// mp_thaw's intro spawnpoint have some problem, player sometimes can be stucked on the sky, so override it
 		SetSpawnpointGamemodeOverride( TEAM_DEATHMATCH )
@@ -2019,6 +2018,17 @@ void function OnHarvesterFinalDamaged( entity harvester, var damageInfo )
 			inflictor.e.damagedEntities.append( harvester )
 	}
 
+	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
+	entity attacker = DamageInfo_GetAttacker( damageInfo )
+
+	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core && damageSourceID != eDamageSourceId.mp_killstreak_orbitalstrike )
+	{
+		if( attacker.IsPlayer() )
+			Remote_CallFunction_NonReplay( attacker , "ServerCallback_FW_NotifyTitanRequired" )
+		DamageInfo_SetDamage( damageInfo, 0 )
+		return
+	}
+
 	int friendlyTeam = harvester.GetTeam()
 	int enemyTeam = GetOtherTeam( friendlyTeam )
 
@@ -2073,7 +2083,7 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 		return
 
 	// prevent player from sniping the harvester cross-map
-	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core )
+	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core && damageSourceID != eDamageSourceId.mp_killstreak_orbitalstrike )
 	{
 		Remote_CallFunction_NonReplay( attacker, "ServerCallback_FW_NotifyNeedsEnterEnemyArea" )
 		DamageInfo_SetDamage( damageInfo, 0 )
@@ -2087,11 +2097,11 @@ void function OnHarvesterPostDamaged( entity harvester, var damageInfo )
 	if( friendlyTeam == TEAM_IMC )
 		harvesterstruct = fw_harvesterImc
 
-	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core )
+	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core && damageSourceID != eDamageSourceId.mp_killstreak_orbitalstrike )
 	{
 		if( attacker.IsPlayer() )
 			Remote_CallFunction_NonReplay( attacker , "ServerCallback_FW_NotifyTitanRequired" )
-		DamageInfo_SetDamage( damageInfo, harvester.GetShieldHealth() )
+		//DamageInfo_SetDamage( damageInfo, harvester.GetShieldHealth() )
 		damageAmount = 0 // never damage haveter's prop
 	}
 
@@ -2182,7 +2192,7 @@ void function InitDefaultHarvesterDamageCallbacks() // default damage modifier f
 
 // damage balancing
 const float HAVESTER_CORE_DAMAGE_FRAC = 0.5 // for core abilities that can deal large amount of damage to a non-moving target(laser core, flight core and salvo core etc.)
-const float HAVESTER_NUKE_DAMAGE_FRAC = 0.2 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
+const float HAVESTER_NUKE_DAMAGE_FRAC = 0.25 // for nuke titans. normally player titan nuke won't do any damage because the nuke damage attacker is player, but player is no longer a titan. just for handling sometimes player nuke then disconnect
 const float HAVESTER_DOT_DAMAGE_FRAC = 0.5 // mostly for scorch and cluter missile, they're very effective against non-moving targets
 const float HARVESTER_LOCKON_DAMAGE_FRAC = 0.75 // mostly for tone, their lock on damage is easy to apply to non-moving targets
 
@@ -2204,13 +2214,7 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 
 		// nuke
 		case damagedef_nuclear_core:
-			float damage = DamageInfo_GetDamage( damageInfo )
-			float frac = ( damageConstraint * 0.5 ) / ( damage * HAVESTER_NUKE_DAMAGE_FRAC )
-			if( frac > 1 )
-				frac = 1
-			DamageInfo_ScaleDamage( damageInfo, HAVESTER_NUKE_DAMAGE_FRAC * frac )
-			damageConstraint -= damage * HAVESTER_NUKE_DAMAGE_FRAC * frac
-			thread DamageConstraintRegen()
+			DamageInfo_ScaleDamage( damageInfo, HAVESTER_NUKE_DAMAGE_FRAC )
 			break
 
 		// damage over time
@@ -2229,6 +2233,9 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		case eDamageSourceId.mp_weapon_scp018:
 			DamageInfo_ScaleDamage( damageInfo, 0.5 )
 			break
+		case eDamageSourceId.mp_killstreak_orbitalstrike:
+			DamageInfo_ScaleDamage( damageInfo, 0.05 )
+			break
 
 		// lockon damage
 		case eDamageSourceId.mp_titanweapon_tracker_rockets:
@@ -2237,7 +2244,7 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 
 		// arc cannon no damage bug fix, i have no idea so hardcode here
 		case eDamageSourceId.mp_titanweapon_arc_cannon:
-			DamageInfo_SetDamage( damageInfo, 5000 )
+			DamageInfo_SetDamage( damageInfo, 2500 )
 			break
 
 		case damagedef_titan_fall:
@@ -2249,20 +2256,12 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 	if ( damageSourceID in file.harvesterDamageSourceMods )
 		DamageInfo_ScaleDamage( damageInfo, file.harvesterDamageSourceMods[ damageSourceID ] )
 
-	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 10, 0.0 ) ) / 100.0
+	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 5, 0.0 ) ) / 100.0
 	if( balanceFrac < 0.25 )
 		balanceFrac = 0.25
 	if( balanceFrac > 4.0 )
 		balanceFrac = 4.0
 	DamageInfo_ScaleDamage( damageInfo, balanceFrac )
-}
-
-void function DamageConstraintRegen()
-{
-	svGlobal.levelEnt.Signal( "DamageConstraint" )
-	svGlobal.levelEnt.EndSignal( "DamageConstraint" )
-	wait 2
-	damageConstraint = 8000
 }
 
 void function HarvesterPostDamageModifier( entity harvester, var damageInfo )

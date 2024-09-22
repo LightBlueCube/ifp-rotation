@@ -16,15 +16,12 @@ void function GamemodeMfd_Init()
 
 	// modify override settings
 	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
-
-	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
 	// todo
 	if ( GAMETYPE == MARKED_FOR_DEATH_PRO )
@@ -58,7 +55,7 @@ void function OnLastMinute()
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "", < 50, 50, 225 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "已標記所有玩家", < 50, 50, 225 >, 255, 6 )
 	}
 
 	thread StartGlobalHighlight()

@@ -7,6 +7,7 @@ global function ScoreAdditionFromTeam
 struct{
 	int teamScoreAddition = 1
 	array<void functionref()> lastMinCallbackFunc = []
+	bool onLastMin = false
 }file
 
 const array<string> LAST_MIN_MUSIC = [
@@ -23,6 +24,7 @@ const array<string> LAST_MIN_MUSIC = [
 void function LastMinute_Init()
 {
     AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+	AddCallback_OnPlayerRespawned( CleanMusic )		// defensive fix
 }
 
 void function SetTeamScoreAddition( int i )
@@ -50,11 +52,13 @@ void function LastMinThreaded()
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 	svGlobal.levelEnt.EndSignal( "GameStateChanged" )
 
+	file.onLastMin = false	// defensive fix
 	string music = LAST_MIN_MUSIC[ RandomInt( LAST_MIN_MUSIC.len() ) ]
 	OnThreadEnd(
 		function():( music )
 		{
 			file.teamScoreAddition = 1
+			file.onLastMin = false
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
@@ -72,6 +76,7 @@ void function LastMinThreaded()
 		timeLimit += 30		//will be change to last 30sec
 
 	wait timeLimit - 60
+	file.onLastMin = true
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
@@ -82,6 +87,14 @@ void function LastMinThreaded()
     foreach( callbackFunc in file.lastMinCallbackFunc )
         callbackFunc()
 	wait 60
+}
+
+void function CleanMusic( entity player )
+{
+	if( file.onLastMin )
+		return
+	foreach( music in LAST_MIN_MUSIC )
+		StopSoundOnEntity( player, music )
 }
 
 int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 , float additionMin = 0.5, float additionMax = 10.0 )

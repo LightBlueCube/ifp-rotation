@@ -169,7 +169,6 @@ void function GamemodeFW_Init()
 	SetRecalculateTitanReplacementPointCallback( FW_ReCalculateTitanReplacementPoint )
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
 
-	FlagSet( "ForceStartSpawn" )
 	AddCallback_OnLastMinute( OnLastMinute )
 
 	// tempfix specifics
@@ -203,7 +202,7 @@ void function OnLastMinute()
 
 		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
 			continue
-		thread CreateTitanForPlayerAndHotdrop( player, CalculateTitanReplacementPoint( player.GetOrigin(), player.EyePosition(), < 90, 0, 0 >, false ) )
+		PlayerEarnMeter_AddEarnedAndOwned( player, 0.0, 1.0 )
 	}
 }
 
@@ -419,44 +418,47 @@ void function SetUpFWScoreEvents()
 	// fw special: save for later use of scoreEvents
 
 	// combat
-	ScoreEvent_SetEarnMeterValues( "FortWarAssault", 0.0, 0.05, 0.0 ) // titans don't earn
-	ScoreEvent_SetEarnMeterValues( "FortWarDefense", 0.0, 0.05, 0.0 ) // titans don't earn
-	ScoreEvent_SetEarnMeterValues( "FortWarPerimeterDefense", 0.0, 0.05 ) // unused
-	ScoreEvent_SetEarnMeterValues( "FortWarSiege", 0.0, 0.05 ) // unused
-	ScoreEvent_SetEarnMeterValues( "FortWarSnipe", 0.0, 0.05 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarAssault", 0.1, 0.05, 0.0 ) // titans don't earn
+	ScoreEvent_SetEarnMeterValues( "FortWarDefense", 0.1, 0.05, 0.0 ) // titans don't earn
+	ScoreEvent_SetEarnMeterValues( "FortWarPerimeterDefense", 0.1, 0.05 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarSiege", 0.1, 0.05 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarSnipe", 0.1, 0.05 ) // unused
 
 	// constructions
-	ScoreEvent_SetEarnMeterValues( "FortWarBaseConstruction", 0.0, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "FortWarForwardConstruction", 0.0, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "FortWarInvasiveConstruction", 0.0, 0.25 ) // unused
-	ScoreEvent_SetEarnMeterValues( "FortWarResourceDenial", 0.0, 0.05 ) // unused
-	ScoreEvent_SetEarnMeterValues( "FortWarSecuringGatheredResources", 0.0, 0.05 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarBaseConstruction", 0.3, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "FortWarForwardConstruction", 0.3, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "FortWarInvasiveConstruction", 0.2, 0.25 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarResourceDenial", 0.1, 0.05 ) // unused
+	ScoreEvent_SetEarnMeterValues( "FortWarSecuringGatheredResources", 0.1, 0.05 ) // unused
 
 	// tower
-	ScoreEvent_SetEarnMeterValues( "FortWarTowerDamage", 0.0, 0.10, 0.0 ) // using the const FW_HARVESTER_DAMAGE_SEGMENT, titans don't earn
-	ScoreEvent_SetEarnMeterValues( "FortWarTowerDefense", 0.0, 0.10, 0.0 ) // titans don't earn
-	ScoreEvent_SetEarnMeterValues( "FortWarShieldDestroyed", 0.0, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "FortWarTowerDamage", 0.2, 0.10, 0.0 ) // using the const FW_HARVESTER_DAMAGE_SEGMENT, titans don't earn
+	ScoreEvent_SetEarnMeterValues( "FortWarTowerDefense", 0.2, 0.10, 0.0 ) // titans don't earn
+	ScoreEvent_SetEarnMeterValues( "FortWarShieldDestroyed", 0.3, 0.15 )
 
 	// turrets
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_One", 0.0, 0.15, 0.5 ) // give more meter if no turret left
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Two", 0.0, 0.15, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Three", 0.0, 0.10, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Four", 0.0, 0.10, 0.5 ) // give less meter if controlled most turrets
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Five", 0.0, 0.05, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Six", 0.0, 0.05, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_One", 0.3, 0.15, 0.5 ) // give more meter if no turret left
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Two", 0.3, 0.15, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Three", 0.2, 0.10, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Four", 0.2, 0.10, 0.5 ) // give less meter if controlled most turrets
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Five", 0.1, 0.05, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "FortWarTeamTurretControlBonus_Six", 0.1, 0.05, 0.5 )
 
 	// modify override settings
 	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.13, 0.020001 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.13, 0.020001, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
-
 
 	// display type
 	// default case is adding a eEventDisplayType.CENTER, required for client to show earnvalue on screen
@@ -2021,11 +2023,20 @@ void function OnHarvesterFinalDamaged( entity harvester, var damageInfo )
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	entity attacker = DamageInfo_GetAttacker( damageInfo )
 
+	int scriptType = DamageInfo_GetCustomDamageType( damageInfo )
+	if ( attacker.IsPlayer() && !FW_IsPlayerInEnemyTerritory( attacker ) && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core && damageSourceID != eDamageSourceId.mp_killstreak_orbitalstrike )
+	{
+		Remote_CallFunction_NonReplay( attacker, "ServerCallback_FW_NotifyNeedsEnterEnemyArea" )
+		DamageInfo_SetDamage( damageInfo, 0 )
+		DamageInfo_SetCustomDamageType( damageInfo, scriptType | DF_NO_INDICATOR ) // hide the hitmarker
+		return // these damage won't do anything to the harvester
+	}
 	if ( !attacker.IsTitan() && damageSourceID != eDamageSourceId.mp_weapon_cruise_missile && damageSourceID != damagedef_nuclear_core && damageSourceID != eDamageSourceId.mp_killstreak_orbitalstrike )
 	{
 		if( attacker.IsPlayer() )
 			Remote_CallFunction_NonReplay( attacker , "ServerCallback_FW_NotifyTitanRequired" )
 		DamageInfo_SetDamage( damageInfo, 0 )
+		DamageInfo_SetCustomDamageType( damageInfo, scriptType | DF_NO_INDICATOR ) // hide the hitmarker
 		return
 	}
 

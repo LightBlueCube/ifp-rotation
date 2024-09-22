@@ -5,7 +5,7 @@ global function GamemodeAITdm_Init
 // these are now default settings
 const int SQUADS_PER_TEAM = 4 // was 3, vanilla seems to have 4 squads
 
-const int REAPERS_PER_TEAM = 3 // was 2, vanilla seems to have 3 reapers
+const int REAPERS_PER_TEAM = 2 // was 2, vanilla seems to have 3 reapers
 
 const int LEVEL_SPECTRES = 125
 const int LEVEL_STALKERS = 380
@@ -61,14 +61,18 @@ void function GamemodeAITdm_Init()
 
 	// modify override settings
 	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.13, 0.020001 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.13, 0.020001, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
 
 	AddCallback_OnLastMinute( OnLastMinute )

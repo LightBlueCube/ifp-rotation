@@ -512,24 +512,29 @@ void function AT_ScoreEventsValueSetUp()
 	// but AT didn't split kills to autotitan and player titan, guess I'll keep 0.0 for both
 	// was set to 0.15, 0.20
 	ScoreEvent_SetEarnMeterValues( "AttritionTitanKilled", 0.0, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "AttritionPilotKilled", 0.10, 0.10, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "AttritionPilotKilled", 0.30, 0.10, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "AttritionBossKilled", 0.0, 0.0 ) // bounty boss is autotitan, add 0.0
-	ScoreEvent_SetEarnMeterValues( "AttritionGruntKilled", 0.02, 0.05, 0.4 )
-	ScoreEvent_SetEarnMeterValues( "AttritionSpectreKilled", 0.05, 0.050001, 0.4 ) // if set to "0.05, 0.05", will display as "9%"
-	ScoreEvent_SetEarnMeterValues( "AttritionStalkerKilled", 0.05, 0.050001, 0.4 ) // if set to "0.05, 0.05", will display as "9%"
-	ScoreEvent_SetEarnMeterValues( "AttritionSuperSpectreKilled", 0.15, 0.15, 0.67 )
+	ScoreEvent_SetEarnMeterValues( "AttritionGruntKilled", 0.1, 0.05, 0.4 )
+	ScoreEvent_SetEarnMeterValues( "AttritionSpectreKilled", 0.1, 0.050001, 0.4 ) // if set to "0.05, 0.05", will display as "9%"
+	ScoreEvent_SetEarnMeterValues( "AttritionStalkerKilled", 0.1, 0.050001, 0.4 ) // if set to "0.05, 0.05", will display as "9%"
+	ScoreEvent_SetEarnMeterValues( "AttritionSuperSpectreKilled", 0.2, 0.15, 0.67 )
 
 	// modify override settings
 	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.10 )
+	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.13, 0.020001 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.13, 0.020001, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
+
 
 	// display type
 	// default case is adding a eEventDisplayType.CENTER, required for client to show earnvalue on screen

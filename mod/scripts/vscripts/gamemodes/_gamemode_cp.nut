@@ -93,27 +93,31 @@ void function CapturePointScoreEventSetUp()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.10 )
 
 	// ampHP specific
-	ScoreEvent_SetEarnMeterValues( "ControlPointCapture", 0.1, 0.1 )
-	ScoreEvent_SetEarnMeterValues( "ControlPointHold", 0.02, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "ControlPointAmped",0.1, 0.1 )
-	ScoreEvent_SetEarnMeterValues( "ControlPointAmpedHold", 0.02, 0.02 )
+	ScoreEvent_SetEarnMeterValues( "ControlPointCapture", 0.2, 0.1 )
+	ScoreEvent_SetEarnMeterValues( "ControlPointHold", 0.08, 0.020001 )
+	ScoreEvent_SetEarnMeterValues( "ControlPointAmped",0.2, 0.1 )
+	ScoreEvent_SetEarnMeterValues( "ControlPointAmpedHold", 0.08, 0.020001 )
 
-	ScoreEvent_SetEarnMeterValues( "HardpointAssault", 0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "HardpointDefense",0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "HardpointPerimeterDefense",0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "HardpointSiege", 0.05, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "HardpointSnipe", 0.05, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "HardpointAssault", 0.1, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "HardpointDefense", 0.1, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "HardpointPerimeterDefense", 0.1, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "HardpointSiege", 0.1, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "HardpointSnipe", 0.1, 0.05 )
 
 	// modify override settings
 	// player-controlled stuff
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.10 )
+	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.6, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
 	// ai
-	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.1, 0.02, 0.5 )
-	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.1, 0.02 )
-	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.1, 0.02, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.13, 0.020001, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.13, 0.020001 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.13, 0.020001, 0.5 )
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.2, 0.1, 0.5 )
 
 	// display type

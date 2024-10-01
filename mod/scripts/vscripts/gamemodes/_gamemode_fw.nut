@@ -169,10 +169,11 @@ void function GamemodeFW_Init()
 	SetRecalculateTitanReplacementPointCallback( FW_ReCalculateTitanReplacementPoint )
 	SetRequestTitanAllowedCallback( FW_RequestTitanAllowed )
 
-	AddCallback_OnLastMinute( OnLastMinute )
-
 	// tempfix specifics
 	EarnMeterMP_SetPassiveGainProgessEnable( true ) // enable earnmeter gain progressing like vanilla
+
+	AddCallback_OnLastMinute( OnLastMinute )
+	SetBetterRespawnPointEnable( false )
 }
 
 void function OnLastMinute()
@@ -449,7 +450,7 @@ void function SetUpFWScoreEvents()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.05 )
 	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
 	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.3, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 
@@ -2268,10 +2269,10 @@ void function HarvesterDamageModifier( entity harvester, var damageInfo )
 		DamageInfo_ScaleDamage( damageInfo, file.harvesterDamageSourceMods[ damageSourceID ] )
 
 	float balanceFrac = float( ScoreAdditionFromTeam( GetOtherTeam( harvester.GetTeam() ), 100, 5, 0.0 ) ) / 100.0
-	if( balanceFrac < 0.25 )
-		balanceFrac = 0.25
-	if( balanceFrac > 4.0 )
-		balanceFrac = 4.0
+	if( balanceFrac < 0.5 )
+		balanceFrac = 0.5
+	if( balanceFrac > 2.0 )
+		balanceFrac = 2.0
 	DamageInfo_ScaleDamage( damageInfo, balanceFrac )
 }
 

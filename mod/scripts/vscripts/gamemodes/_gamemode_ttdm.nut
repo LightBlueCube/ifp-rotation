@@ -74,15 +74,6 @@ void function SetUpTTDMScoreEvents()
 	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "TitanAssist", 0.0, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "Execution", 0.0, 0.0 )
-
-	// modify override settings
-	// player-controlled stuff
-	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.15 )
-	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.05 )
-	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.0 )
-	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
-	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 }
 
 void function TTDMIntroSetup()
@@ -201,7 +192,7 @@ int function CheckScoreForDraw()
 
 // modified from MixedGame extra_ai_spawner.gnut: care package
 const float CARE_PACKAGE_LIFETIME = 90
-const float CARE_PACKAGE_WAITTIME = 10
+const float CARE_PACKAGE_WAITTIME = 0
 const asset CAREPACKAGE_MODEL = $"models/vehicle/escape_pod/escape_pod.mdl"
 
 void function OnPlaying()
@@ -213,7 +204,7 @@ void function DropPodSpawnThreaded()
 {
 	while( GetGameState() == eGameState.Playing )
 	{
-		wait RandomFloatRange( 30, 60 )
+		wait RandomFloatRange( 15, 45 )
 
 		foreach( entity player in GetPlayerArray() )
 		{
@@ -323,7 +314,8 @@ void function PodOnDamaged( entity pod, var damageInfo )
 		return
 
 	entity attacker = DamageInfo_GetAttacker( damageInfo )
-	attacker.NotifyDidDamage( pod, DamageInfo_GetHitBox( damageInfo ), DamageInfo_GetDamagePosition( damageInfo ), DamageInfo_GetCustomDamageType( damageInfo ), DamageInfo_GetDamage( damageInfo ), DamageInfo_GetDamageFlags( damageInfo ), DamageInfo_GetHitGroup( damageInfo ), DamageInfo_GetWeapon( damageInfo ), DamageInfo_GetDistFromAttackOrigin( damageInfo ) )
+	if( attacker.IsPlayer() )
+		attacker.NotifyDidDamage( pod, DamageInfo_GetHitBox( damageInfo ), DamageInfo_GetDamagePosition( damageInfo ), DamageInfo_GetCustomDamageType( damageInfo ), DamageInfo_GetDamage( damageInfo ), DamageInfo_GetDamageFlags( damageInfo ), DamageInfo_GetHitGroup( damageInfo ), DamageInfo_GetWeapon( damageInfo ), DamageInfo_GetDistFromAttackOrigin( damageInfo ) )
 	float damage = DamageInfo_GetDamage( damageInfo )
 	int health = pod.GetHealth()
 	health -= int( damage )

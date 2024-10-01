@@ -84,6 +84,7 @@ void function CaptureTheFlag_Init()
 	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_defender", "mp_weapon_mgl" ] )
 	AITdm_SetSquadsPerTeam( 3 )
 	AITdm_SetReapersPerTeam( 1 )
+	SetBetterRespawnPointEnable( false )
 }
 
 void function OnPlayerRespawned( entity player )
@@ -180,7 +181,7 @@ void function CTFScoreEventSetUp()
 	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.30, 0.10 )
 	ScoreEvent_SetEarnMeterValues( "EliminatePilot", 0.30, 0.10 )
 	ScoreEvent_SetEarnMeterValues( "PilotAssist", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
-	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.4, 0.10, 0.0 )
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.3, 0.10, 0.0 )
 	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.10 ) // this actually just doesn't have overdrive in vanilla even
 	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.3, 0.020001, 0.0 ) // if set to "0.03, 0.02", will display as "4%"
 

@@ -65,7 +65,7 @@ void function VoteForGamemode()
 	// start vote
 	voteStatus = true
 	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
-	float endTime = Time() + 16
+	float endTime = Time() + 20
 	while( Time() < endTime )
 	{
 		string text = ""

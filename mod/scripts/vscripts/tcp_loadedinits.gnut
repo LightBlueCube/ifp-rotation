@@ -90,6 +90,6 @@ void function LoadedInits_Init()
 		vtol = 10
 		orbitalStrike = 4
 		scp018 = 5
-		nuclearBomb = 20
+		nuclearBomb = 15
 	})
 }

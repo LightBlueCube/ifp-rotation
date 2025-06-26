@@ -57,7 +57,7 @@ void function OnLastMinute()
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
 }
 
@@ -209,7 +209,7 @@ void function DropPodSpawnThreaded()
 		foreach( entity player in GetPlayerArray() )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "Boomtown_RobotArm_90Turn" )
-			NSSendLargeMessageToPlayer( player, "電池補給艙運送中! ", "打破補給艙來獲得電池", 7, "rui/callsigns/callsign_69_col" )
+			RUIQueue_NSSendLargeMessageToPlayer( player, "電池補給艙運送中! ", "打破補給艙來獲得電池", 7, "rui/callsigns/callsign_69_col" )
 		}
 
 		array< entity > points = SpawnPoints_GetTitan()

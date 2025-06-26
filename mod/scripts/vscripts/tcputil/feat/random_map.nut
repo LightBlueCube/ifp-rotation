@@ -227,7 +227,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	ps = {
 		scorelimit = "2147483647"
-		timelimit = "12"
+		timelimit = "10"
 	}
 
 	at = {
@@ -250,7 +250,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 	ttdm = {
 		respawn_delay = "0"
 		scorelimit = "2147483647"
-		timelimit = "12"
+		timelimit = "10"
 	}
 
 	ctf = {
@@ -261,7 +261,7 @@ const table<string, table<string, string> > PLAYLIST_OVERRIDES = {
 
 	mfd = {
 		scorelimit = "16"
-		timelimit = "12"
+		timelimit = "10"
 	}
 }
 

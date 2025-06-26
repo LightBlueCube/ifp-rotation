@@ -199,7 +199,7 @@ void function OnLastMinute()
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "采集機護盾離線！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( player, "采集機護盾離線！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
 		if( IsValid( player.GetPetTitan() ) || player.IsTitan() )
 			continue

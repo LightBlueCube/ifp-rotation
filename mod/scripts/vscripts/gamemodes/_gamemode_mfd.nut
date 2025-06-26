@@ -55,7 +55,7 @@ void function OnLastMinute()
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "已標記所有玩家", < 50, 50, 225 >, 255, 6 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "已標記所有玩家", < 50, 50, 225 >, 255, 6 )
 	}
 
 	thread StartGlobalHighlight()
@@ -365,5 +365,5 @@ void function UpdateMarksForKill( entity victim, entity attacker, var damageInfo
 void function SendAnnouncementMessageWaiting( entity player, string text, float sec )
 {
 	wait sec
-	NSSendAnnouncementMessageToPlayer( player, text, "", < 255, 0, 0 >, 255, 5 )
+	RUIQueue_NSSendAnnouncementMessageToPlayer( player, text, "", < 255, 0, 0 >, 255, 5 )
 }
